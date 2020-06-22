@@ -9,6 +9,7 @@ from utils.load_dataset import load_dataset
 import matplotlib.pyplot as plt
 from attack_framework.multi_lib_attacks import attack_wrapper
 from utils.preprocess import preprocess as PreProcess
+import os
 
 class Framework():
     def __init__(self,
@@ -148,6 +149,10 @@ class Framework():
             iterations = iterations
             self.model_name += '_adv'
 
+        os.makedirs('./pretrained/', exist_ok=True)
+        os.makedirs('./pretrained/'+self.dataset+'/', exist_ok=True)
+        os.makedirs('./pretrained/'+self.dataset+'/temp/', exist_ok=True)
+        
         # Training parameters exposed for hooks to access them
         self.best_val_accuracy = 0.0
         self.best_val_loss = 0.0
@@ -411,13 +416,14 @@ class Framework():
                                         }
 
             torch.save(saved_training_state, './pretrained/' + self.dataset + '/temp/' + self.model_name + '.temp')
-            
+
             if save_ckpt:
                 self.saves.append(self.current_epoch)
                 if parallel:
                     torch.save(self.net.module.state_dict(), './pretrained/'+ self.dataset +'/' + self.model_name  + '.ckpt')
                 else:
                     torch.save(self.net.state_dict(), './pretrained/'+  self.dataset +'/' + self.model_name + '.ckpt')
+
 
                 test_correct, test_total, test_accuracy = self.test()
                 self.current_test_acc = test_accuracy
