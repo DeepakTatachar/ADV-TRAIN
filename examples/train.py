@@ -40,7 +40,6 @@ parser.add_argument('--torch_weights',  default=False,      type=str2bool,   hel
 
 
 # Attack parameters
-#####Not yet supported
 parser.add_argument('--adv_trn',    default=False,      type=str2bool,  help='adv Training')
 parser.add_argument('--attack',     default='PGD',      type=str,       help='Type of attack [PGD, CW]')
 parser.add_argument('--lib',        default='custom',   type=str,       help='Use [foolbox, advtorch, custom] code for adversarial attack')
@@ -48,6 +47,7 @@ parser.add_argument('--use_bpda',   default=True,       type=str2bool,  help='Us
 parser.add_argument('--random',     default=True,       type=str2bool,  help='Random seed/strating points')
 parser.add_argument('--iterations', default=40,         type=int,       help='Number of iterations of PGD')
 parser.add_argument('--epsilon',    default=0.031,      type=float,     help='epsilon for PGD')
+parser.add_argument('--targeted',   default=None,       type=int,       help='Target class for targeted attack, None for non targeted attack')
 parser.add_argument('--stepsize',   default=0.01,       type=float,     help='stepsize for attack')
 
 global args
@@ -87,6 +87,14 @@ framework = Framework(net=net,
                       loss=args.loss,
                       learning_rate=args.lr,
                       adversarial_training=args.adv_trn,
+                      lib = args.lib,
+                      attack=args.attack,
+                      iterations=args.iterations,
+                      epsilon=args.epsilon,
+                      stepsize=args.stepsize,
+                      use_bpda=args.use_bpda,
+                      target=args.targeted,
+                      random=args.random,
                       device=None)
 
 framework.train(epoch_hook=epoch_hook)

@@ -11,6 +11,7 @@ from attack_framework.multi_lib_attacks import attack_wrapper
 from utils.preprocess import preprocess as PreProcess
 import os
 
+
 class Framework():
     def __init__(self,
                  net=None,
@@ -414,7 +415,6 @@ class Framework():
                                             'best_val_accuracy' : self.best_val_accuracy,
                                             'best_val_loss'     : self.best_val_loss
                                         }
-
             torch.save(saved_training_state, './pretrained/' + self.dataset + '/temp/' + self.model_name + '.temp')
 
             if save_ckpt:
