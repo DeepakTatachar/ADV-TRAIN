@@ -25,4 +25,4 @@ Opening this in any web browser. This project uses Sphnix to autogenerate this d
 
 ### Running Examples
 
-This repo
+This repo has examples on how to train and visualize boundaries in /examples folder. To run then move them to the root folder and run them.
