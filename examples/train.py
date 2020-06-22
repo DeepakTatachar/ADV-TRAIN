@@ -58,9 +58,7 @@ def epoch_hook(framework):
     if (framework.current_epoch+1)%args.test_accuracy_display==0:
         print("\nEpoch {}: \n Train Loss:{} \n Train Accuracy:{} \n Test Accuracy:{} ".format(framework.current_epoch, framework.current_train_loss, framework.current_train_acc, framework.current_test_acc) )
 
-if args.dataset.lower()=='simple':
-    num_classes=4
-elif args.dataset.lower()=='imagenet':
+if args.dataset.lower()=='imagenet':
     num_classes=1000
 elif  args.dataset.lower()=='tinyimagenet':
     num_classes=200
