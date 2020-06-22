@@ -7,6 +7,8 @@
 import torch
 from utils.load_dataset import load_dataset
 import matplotlib.pyplot as plt
+from attack_framework.multi_lib_attacks import attack_wrapper
+from utils.preprocess import preprocess as PreProcess
 
 class Framework():
     def __init__(self,
@@ -14,7 +16,7 @@ class Framework():
                  model_name=None,
                  dataset='cifar10',
                  normalize=None,
-                 preprocess=lambda x: x,
+                 preprocess=None,
                  epochs=350,
                  train_batch_size=128,
                  test_batch_size=128,
@@ -27,6 +29,14 @@ class Framework():
                  loss='crossentropy',
                  learning_rate=0.01,
                  adversarial_training=False,
+                 lib = 'custom',
+                 attack='PGD',
+                 iterations=40,
+                 epsilon=0.031,
+                 stepsize=0.01,
+                 use_bpda=True,
+                 target=None,
+                 random=False,
                  device=None):
         """This is a framework to train and evaluate a network, when training it uses mean and std normalization
         
@@ -43,13 +53,21 @@ class Framework():
             random_seed (int): Fixes the shuffle seed for reproducing the results
             optimizer (str): Name of the optimizer to use
             loss (str): Name of the loss to use for training
+            adversarial_training (bool): True for adversaril training
+            lib (str): select the implementing library custom, advertorch or foolbox
+            attack(str): select the attack type PGD,CW,...
+            iterations(int): Number of iterations for the attack
+            epsilon(float) : attack strength
+            stepsize(float) : step size for the attack
+            use_bpda : Backward propagation through differential approximation
+            target(int): None for non targeted attack. class label for targeted attack
+            random(bool) : False for deterministic implementation
             device (str): cpu/cuda device to perform the evaluation on, if left to None picks up the CPU if available
         Returns:
             Returns an object of the framework
         """                 
         self.net = net
         self.dataset = dataset.lower()
-        self.preprocess = preprocess
         self.normalize = normalize
         self.train_batch_size = train_batch_size
         self.test_batch_size = test_batch_size
@@ -96,6 +114,39 @@ class Framework():
 
         self.num_classes = self.dataset_info['num_classes']
         self.img_size = self.dataset_info['image_dimensions'] 
+
+        if preprocess==None:
+            self.preprocess =PreProcess()
+        else:
+            self.preprocess =preprocess
+
+        self.target=target
+        if adversarial_training:
+            if self.target==None:
+                self.targeted=False
+            else:
+                self.targeted=True
+
+            self.attack_params = {  'lib': lib,
+                                    'attack': attack,
+                                    'iterations': iterations,
+                                    'epsilon': epsilon,
+                                    'stepsize': stepsize,
+                                    'bpda': use_bpda,
+                                    'preprocess': self.preprocess,
+                                    'custom_norm_func': self.normalize,
+                                    'targeted': self.targeted,
+                                    'random': random }
+
+            self.dataset_params =  { 'mean': self.dataset_info['mean'],
+                                    'std': self.dataset_info['std'],
+                                    'num_classes': self.dataset_info['num_classes'] }
+
+            self.attack_info = {'attack_params': self.attack_params,
+                    'dataset_params': self.dataset_params}
+            self.attack = attack_wrapper(self.net, self.device, **self.attack_info)
+            iterations = iterations
+            self.model_name += '_adv'
 
         # Training parameters exposed for hooks to access them
         self.best_val_accuracy = 0.0
@@ -304,9 +355,8 @@ class Framework():
 
                 # Generate adversarial image
                 if self.adversarial_training:
-                    raise ValueError("Adversarial training not supported")
-                    perturbed_data, un_norm_perturbed_data = attack.generate_adversary(data, labels, adv_train_model = net )
-                    data = self.preprocess(perturbed_data).to(device)
+                    perturbed_data, un_norm_perturbed_data = self.attack.generate_adversary(data, labels, adv_train_model = self.net, targeted=self.targeted, target_class=self.target )
+                    data = self.preprocess(perturbed_data).to(self.device)
                 else:
                     data = self.preprocess(self.normalize(data))
                 
