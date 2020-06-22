@@ -31,3 +31,6 @@ Modules
 .. autoclass:: utils.boundary_visualization_extension.VisualizeBoundaries
    :members: generate_decision_boundaries, __init__, show
 
+.. autoclass:: utils.preprocess.preprocess
+   :members: forward, back_approx
+
