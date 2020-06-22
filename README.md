@@ -1,4 +1,4 @@
-# ADV-TRAIN : ADV-Train is Deep Vision TRaining And INference Framework
+# ADV-TRAIN : ADV-TRAIN is Deep Vision TRaining And INference framework
 
 This is a framework built on top of pytorch to make machine learning training and inference tasks easier. Along with that it also enables easy dataset and network instantiations, visualize boundaries and more.
 
