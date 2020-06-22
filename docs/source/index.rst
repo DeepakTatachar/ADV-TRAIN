@@ -1,11 +1,7 @@
-.. Ocean documentation master file, created by
-   sphinx-quickstart on Fri Jun 12 12:03:05 2020.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
-
-Welcome to Ocean's documentation!
-=================================
-This was created at the Nanoelectronics Research Laboratory at Purdue
+Welcome to ADV-TRAIN's documentation!
+=====================================
+This is a framework built on top of pytorch to make machine learning training and inference tasks easier. Along with that it also enables easy dataset and network instantiations, visualize boundaries and more.
+This was created at the Nanoelectronics Research Laboratory at Purdue.
 
 Indices and tables
 ==================

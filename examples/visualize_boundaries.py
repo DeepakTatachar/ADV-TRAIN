@@ -49,9 +49,7 @@ def epoch_hook(framework):
                                                                                               framework.current_train_acc, 
                                                                                               framework.current_test_acc))
 
-if args.dataset.lower()=='simple':
-    num_classes=4
-elif args.dataset.lower()=='imagenet':
+if args.dataset.lower()=='imagenet':
     num_classes=1000
 elif  args.dataset.lower()=='tinyimagenet':
     num_classes=200

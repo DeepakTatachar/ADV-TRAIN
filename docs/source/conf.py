@@ -16,8 +16,8 @@ sys.path.insert(0, os.path.abspath('../..'))
 
 # -- Project information -----------------------------------------------------
 
-project = 'Ocean'
-copyright = '2020, Deepak Ravikumar Tatachar and Sangamesh Kodge'
+project = 'ADV-TRAIN : ADV-Train is Deep Vision TRaining And INference Framework'
+copyright = '2020, Deepak Ravikumar Tatachar and Sangamesh Kodge, NRL Purdue'
 author = 'Deepak Ravikumar Tatachar and Sangamesh Kodge'
 
 # The full version, including alpha/beta/rc tags

@@ -6,9 +6,7 @@ import torch
 from models.AlexNet import *
 from models.resnet import *
 from models.lenet5 import *
-from models.basicnet import *
 from models.vgg import *
-from models.slpnet import *
 import torchvision.models as models
 import os
 
@@ -17,8 +15,7 @@ def instantiate_model(dataset='cifar10',
                       arch='resnet',
                       suffix='', 
                       load=False,
-                      torch_weights=False,
-                      conv_mode=1):
+                      torch_weights=False):
 
     """Initializes/load network with random weight/saved and return auto generated model name 'dataset_arch_suffix.ckpt'
     
@@ -29,33 +26,10 @@ def instantiate_model(dataset='cifar10',
         suffix          : str appended to the model name 
         load            : boolean variable to indicate load pretrained model from ./pretrained/dataset/
         torch_weights   : boolean variable to indicate load weight from torchvision for imagenet dataset
-        conv_mode       : 1 for torch conv; 2(down right); 3(up right); 4(down left) and 5(up left) for custom conv in different directions
     Returns:
         model           : models with desired weight (pretrained / random )
         model_name      : str 'dataset_arch_suffix.ckpt' used to save/load model in ./pretrained/dataset
     """
-
-    if conv_mode == 1:
-        down = None
-        right = None
-    elif conv_mode == 2 and arch == 'slpconv':
-        print("Custom conv down right")
-        down = True
-        right = True
-    elif conv_mode == 3 and arch == 'slpconv':
-        print("Custom conv up right")
-        down = False
-        right = True
-    elif conv_mode == 4 and arch == 'slpconv':
-        print("Custom conv down left")
-        down = True
-        right = False
-    elif conv_mode == 5 and arch == 'slpconv':
-        print("Custom conv up left")
-        down = False
-        right = False
-    else:
-        raise ValueError("Unsupported mode for the architecture")
 
     # RESNET IMAGENET
     if(arch == 'torch_resnet18'):
@@ -172,17 +146,6 @@ def instantiate_model(dataset='cifar10',
     # LENET MNIST
     elif (arch == 'lenet5'):
         model = LeNet5(num_classes=num_classes)
-        model_name = dataset.lower()+ "_" + arch + suffix
-
-    #SLP/BASIC/SLPCONV TOY DATASET
-    elif (arch == 'basic'):
-        model = BasicNet(num_classes=num_classes)
-        model_name = dataset.lower()+ "_" + arch + suffix
-    elif (arch == 'slp'):
-        model = SLPNet(num_classes=num_classes)
-        model_name = dataset.lower()+ "_" + arch + suffix
-    elif (arch == 'slpconv'):
-        model = SLPConvNet(num_classes=num_classes, down=down, right=right)
         model_name = dataset.lower()+ "_" + arch + suffix
     else:
         # Right way to handle exception in python see https://stackoverflow.com/questions/2052390/manually-raising-throwing-an-exception-in-python
