@@ -2,6 +2,8 @@
 
 This is a framework built on top of pytorch to make machine learning training and inference tasks easier. Along with that it also enables easy dataset and network instantiations, visualize boundaries and more.
 
+Read the latest documentation at https://adv-train.readthedocs.io/en/latest/
+
 ## Why use this framework?
 - It is very easy to use and well documented and tested
 - The framework supports resume (Yes you can restart training from where ever you left off when your server crashed!). 
@@ -20,6 +22,7 @@ pip install -r requirements.txt
 to install all required dependencies
 
 ### Documentation
+Read the latest documentation at https://adv-train.readthedocs.io/en/latest/
 
 To read the documentation, navigate to /docs and type
 

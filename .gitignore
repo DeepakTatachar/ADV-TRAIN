@@ -10,6 +10,7 @@ pretrained/
 # Distribution / packaging
 .Python
 data/
+docs/build
 build/
 develop-eggs/
 dist/
