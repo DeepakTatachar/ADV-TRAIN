@@ -2,7 +2,7 @@
 
 This is a framework built on top of pytorch to make machine learning training and inference tasks easier. Along with that it also enables easy dataset and network instantiations, visualize boundaries and more.
 
-## Why use this framework
+## Why use this framework?
 - It is very easy to use and well documented and tested
 - The framework supports resume (Yes you can restart training from where ever you left off when your server crashed!). 
 - The framework also implements support for train/validation splits of your choice with early stopping baked in. 
@@ -40,4 +40,4 @@ When using the training code please create the following folder structure in the
 /pretrained/<dataset name in small letters>/temp
 ```
 
-This lets the framework store the models with the nomenclature datasetname_architecture_suffix.ckpt. The temp folder contains information stored by the framework for resume support (Yes you can restart training from whereever you left of when your server crashed!).
+This lets the framework store the models with the nomenclature datasetname_architecture_suffix.ckpt. The temp folder contains information stored by the framework for resume support.
