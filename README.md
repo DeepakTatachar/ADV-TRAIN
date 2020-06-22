@@ -12,7 +12,7 @@ This is a framework built on top of pytorch to make machine learning training an
 
 ### Installing
 
-Requirements are listed in requiements.txt. Use the command
+Requirements are listed in requirements.txt. Use the command
 
 ```
 pip install -r requirements.txt
