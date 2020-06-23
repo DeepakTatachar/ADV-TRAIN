@@ -36,10 +36,10 @@ class VisualizeBoundaries():
         """   
         if(framework):
             self.net = framework.net
-            self.num_classes = framework.dataset_info['num_classes']
+            self.num_classes = framework.dataset_info.num_classes
             self.device = framework.device
-            self.num_channels = framework.dataset_info['image_channels']
-            self.img_size = framework.dataset_info['image_dimensions']
+            self.num_channels = framework.dataset_info.image_channels
+            self.img_size = framework.dataset_info.image_dimensions
         else:
             self.net = net
             self.num_classes = num_classes

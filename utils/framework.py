@@ -67,7 +67,7 @@ class Framework():
             device (str): cpu/cuda device to perform the evaluation on, if left to None picks up the CPU if available
         Returns:
             Returns an object of the framework
-        """                 
+        """   
         self.net = net
         self.dataset = dataset.lower()
         self.normalize = normalize
@@ -92,7 +92,7 @@ class Framework():
         # Optimizer
         self.optimizer = self.get_optimizer(optimizer, learning_rate)
         self.criterion = self.get_criterion_for_loss_function(loss)
-        self.dataset_info = load_dataset(dataset=self.dataset,
+        self.dataset_info = load_dataset(dataset = self.dataset,
                                          train_batch_size=self.train_batch_size,
                                          test_batch_size=self.test_batch_size, 
                                          val_split=self.val_split, 
@@ -102,20 +102,20 @@ class Framework():
                                          random_seed=None,
                                          device=self.device)
 
-        self.train_loader = self.dataset_info['train_loader']
-        self.val_loader = self.dataset_info['validation_loader']
-        self.test_loader = self.dataset_info['test_loader']
+        self.train_loader = self.dataset_info.train_loader
+        self.val_loader = self.dataset_info.validation_loader
+        self.test_loader = self.dataset_info.test_loader
 
         self.train_len = len(self.train_loader)
         self.val_len = len(self.val_loader)
         self.test_len = len(self.test_loader)
 
         if(self.normalize is None):
-            self.normalize = self.dataset_info['normalization']
-        self.num_channels = self.dataset_info['image_channels']
+            self.normalize = self.dataset_info.normalization
+        self.num_channels = self.dataset_info.image_channels
 
-        self.num_classes = self.dataset_info['num_classes']
-        self.img_size = self.dataset_info['image_dimensions'] 
+        self.num_classes = self.dataset_info.num_classes
+        self.img_size = self.dataset_info.image_dimensions
 
         if preprocess==None:
             self.preprocess =PreProcess()
@@ -140,9 +140,9 @@ class Framework():
                                     'targeted': self.targeted,
                                     'random': random }
 
-            self.dataset_params =  { 'mean': self.dataset_info['mean'],
-                                    'std': self.dataset_info['std'],
-                                    'num_classes': self.dataset_info['num_classes'] }
+            self.dataset_params =  { 'mean': self.dataset_info.mean,
+                                    'std': self.dataset_info.std,
+                                    'num_classes': self.dataset_info.num_classes}
 
             self.attack_info = {'attack_params': self.attack_params,
                     'dataset_params': self.dataset_params}
@@ -249,6 +249,7 @@ class Framework():
         correct = 0
         total = 0
         torch.cuda.empty_cache()
+        
         with torch.no_grad():
             for batch_idx, (data, labels) in enumerate(self.test_loader):
                 data = data.to(self.device)
@@ -273,6 +274,7 @@ class Framework():
             accuracy (float), accuracy in %
             loss (float), average loss over the validation set
         """
+        self.net = self.net.to(self.device)
         self.net.eval()
         correct = 0
         total = 0
@@ -315,6 +317,8 @@ class Framework():
             parallel_devices_ids (list of int): the device id's to use
             visualize(bool) : see the image in the dataset.
         """
+        self.net = self.net.to(self.device)
+        self.net.train()
         if resume_training:
             saved_training_state = torch.load('./pretrained/'+ self.dataset +'/temp/' + self.model_name  + '.temp')
             start_epoch =  saved_training_state['epoch']
