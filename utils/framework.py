@@ -7,7 +7,7 @@
 import torch
 from utils.load_dataset import load_dataset
 import matplotlib.pyplot as plt
-from attack_framework.multi_lib_attacks import attack_wrapper
+from utils.attack_framework.multi_lib_attacks import attack_wrapper
 from utils.preprocess import preprocess as PreProcess
 import os
 

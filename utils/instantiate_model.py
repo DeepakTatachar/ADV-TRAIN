@@ -8,15 +8,23 @@ from models.resnet import *
 from models.lenet5 import *
 from models.vgg import *
 import torchvision.models as models
+from utils.quantise import Quantise2d
 import os
+from utils.preprocess import preprocess as PreProcess
 
-def instantiate_model(dataset='cifar10',
-                      num_classes=10, 
-                      arch='resnet',
-                      suffix='', 
-                      load=False,
-                      torch_weights=False):
-
+def instantiate_model (dataset='cifar10',
+                       num_classes=10, 
+                       input_quant='FP', 
+                       arch='resnet',
+                       dorefa=False, 
+                       abit=32, 
+                       wbit=32,
+                       qin=False, 
+                       qout=False,
+                       suffix='', 
+                       load=False,
+                       torch_weights=False,
+                       device='cpu'):
     """Initializes/load network with random weight/saved and return auto generated model name 'dataset_arch_suffix.ckpt'
     
     Args:
@@ -30,101 +38,204 @@ def instantiate_model(dataset='cifar10',
         model           : models with desired weight (pretrained / random )
         model_name      : str 'dataset_arch_suffix.ckpt' used to save/load model in ./pretrained/dataset
     """
+    #Select the input transformation
+    if input_quant==None:
+        input_quant=''
+        Q=PreProcess()
+    elif input_quant.lower()=='q1':
+        Q = Quantise2d(n_bits=1).to(device)
+    elif input_quant.lower()=='q2':
+        Q = Quantise2d(n_bits=2).to(device)
+    elif input_quant.lower()=='q4':
+        Q = Quantise2d(n_bits=4).to(device)
+    elif input_quant.lower()=='q6':
+        Q = Quantise2d(n_bits=6).to(device)
+    elif input_quant.lower()=='q8':
+        Q = Quantise2d(n_bits=8).to(device)
+    elif input_quant.lower()=='fp':
+        Q = Quantise2d(n_bits=1,quantise=False).to(device)
+    else:    
+        raise ValueError
 
+    # Instantiate model1
     # RESNET IMAGENET
     if(arch == 'torch_resnet18'):
-        model = models.resnet18(pretrained=torch_weights)
-        model_name = dataset.lower()+ "_" + arch + suffix
+        if dorefa:
+            raise ValueError ("Dorefa net unsupported for {}".format(arch))
+        else:
+            model = models.resnet18(pretrained=torch_weights)
+            model_name = dataset.lower()+ "_" + input_quant + "_" + arch + suffix
     elif(arch == 'torch_resnet34'):
-        model = models.resnet34(pretrained=torch_weights)
-        model_name = dataset.lower()+ "_" + arch + suffix
+        if dorefa:
+            raise ValueError ("Dorefa net unsupported for {}".format(arch))
+        else:
+            model = models.resnet34(pretrained=torch_weights)
+            model_name = dataset.lower()+ "_" + input_quant + "_" + arch + suffix
     elif(arch == 'torch_resnet50'):
-        model = models.resnet50(pretrained=torch_weights)
-        model_name = dataset.lower()+ "_" + arch + suffix
+        if dorefa:
+            raise ValueError ("Dorefa net unsupported for {}".format(arch))
+        else:
+            model = models.resnet50(pretrained=torch_weights)
+            model_name = dataset.lower()+ "_" + input_quant + "_" + arch + suffix
     elif(arch == 'torch_resnet101'):
-        model = models.resnet101(pretrained=torch_weights)
-        model_name = dataset.lower()+ "_" + arch + suffix
+        if dorefa:
+            raise ValueError ("Dorefa net unsupported for {}".format(arch))
+        else:
+            model = models.resnet101(pretrained=torch_weights)
+            model_name = dataset.lower()+ "_" + input_quant + "_" + arch + suffix
     elif(arch == 'torch_resnet152'):
-        model = models.resnet152(pretrained=torch_weights)
-        model_name = dataset.lower()+ "_" + arch + suffix
+        if dorefa:
+            raise ValueError ("Dorefa net unsupported for {}".format(arch))
+        else:
+            model = models.resnet152(pretrained=torch_weights)
+            model_name = dataset.lower()+ "_" + input_quant + "_" + arch + suffix
     elif(arch == 'torch_resnet34'):
-        model = models.resnet34(pretrained=torch_weights)
-        model_name = dataset.lower()+ "_" + arch + suffix
+        if dorefa:
+            raise ValueError ("Dorefa net unsupported for {}".format(arch))
+        else:
+            model = models.resnet34(pretrained=torch_weights)
+            model_name = dataset.lower()+ "_" + input_quant + "_" + arch + suffix
     elif(arch == 'torch_resnext50_32x4d'):
-        model = models.resnext50_32x4d(pretrained=torch_weights)
-        model_name = dataset.lower()+ "_" + arch + suffix
+        if dorefa:
+            raise ValueError ("Dorefa net unsupported for {}".format(arch))
+        else:
+            model = models.resnext50_32x4d(pretrained=torch_weights)
+            model_name = dataset.lower()+ "_" + input_quant + "_" + arch + suffix
     elif(arch == 'torch_resnext101_32x8d'):
-        model = models.resnext101_32x8d(pretrained=torch_weights)
-        model_name = dataset.lower()+ "_" + arch + suffix
+        if dorefa:
+            raise ValueError ("Dorefa net unsupported for {}".format(arch))
+        else:
+            model = models.resnext101_32x8d(pretrained=torch_weights)
+            model_name = dataset.lower()+ "_" + input_quant + "_" + arch + suffix
     elif(arch == 'torch_wide_resnet50_2'):
-        model = models.wide_resnet50_2(pretrained=torch_weights)
-        model_name = dataset.lower()+ "_" + arch + suffix
+        if dorefa:
+            raise ValueError ("Dorefa net unsupported for {}".format(arch))
+        else:
+            model = models.wide_resnet50_2(pretrained=torch_weights)
+            model_name = dataset.lower()+ "_" + input_quant + "_" + arch + suffix
     elif(arch == 'torch_wide_resnet101_2'):
-        model = models.wide_resnet101_2(pretrained=torch_weights)
-        model_name = dataset.lower()+ "_" + arch + suffix
-
+        if dorefa:
+            raise ValueError ("Dorefa net unsupported for {}".format(arch))
+        else:
+            model = models.wide_resnet101_2(pretrained=torch_weights)
+            model_name = dataset.lower()+ "_" + input_quant + "_" + arch + suffix
     #VGG IMAGENET
     elif(arch == 'torch_vgg11'):
-        model = models.vgg11(pretrained=torch_weights)
-        model_name = dataset.lower()+ "_" + arch + suffix
+        if dorefa:
+            raise ValueError ("Dorefa net unsupported for {}".format(arch))
+        else:
+            model = models.vgg11(pretrained=torch_weights)
+            model_name = dataset.lower()+ "_" + input_quant + "_" + arch + suffix
     elif(arch == 'torch_vgg11bn'):
-        model = models.vgg11_bn(pretrained=torch_weights)
-        model_name = dataset.lower()+ "_" + arch + suffix
+        if dorefa:
+            raise ValueError ("Dorefa net unsupported for {}".format(arch))
+        else:
+            model = models.vgg11_bn(pretrained=torch_weights)
+            model_name = dataset.lower()+ "_" + input_quant + "_" + arch + suffix
     elif(arch == 'torch_vgg13'):
-        model = models.vgg13(pretrained=torch_weights)
-        model_name = dataset.lower()+ "_" + arch + suffix
+        if dorefa:
+            raise ValueError ("Dorefa net unsupported for {}".format(arch))
+        else:
+            model = models.vgg13(pretrained=torch_weights)
+            model_name = dataset.lower()+ "_" + input_quant + "_" + arch + suffix
     elif(arch == 'torch_vgg13bn'):
-        model = models.vgg13_bn(pretrained=torch_weights)
-        model_name = dataset.lower()+ "_" + arch + suffix
+        if dorefa:
+            raise ValueError ("Dorefa net unsupported for {}".format(arch))
+        else:
+            model = models.vgg13_bn(pretrained=torch_weights)
+            model_name = dataset.lower()+ "_" + input_quant + "_" + arch + suffix
     elif(arch == 'torch_vgg16'):
-        model = models.vgg16(pretrained=torch_weights)
-        model_name = dataset.lower()+ "_" + arch + suffix
+        if dorefa:
+            raise ValueError ("Dorefa net unsupported for {}".format(arch))
+        else:
+            model = models.vgg16(pretrained=torch_weights)
+            model_name = dataset.lower()+ "_" + input_quant + "_" + arch + suffix
     elif(arch == 'torch_vgg16bn'):
-        model = models.vgg16_bn(pretrained=torch_weights)
-        model_name = dataset.lower()+ "_" + arch + suffix
+        if dorefa:
+            raise ValueError ("Dorefa net unsupported for {}".format(arch))
+        else:
+            model = models.vgg16_bn(pretrained=torch_weights)
+            model_name = dataset.lower()+ "_" + input_quant + "_" + arch + suffix
     elif(arch == 'torch_vgg19'):
-        model = models.vgg19(pretrained=torch_weights)
-        model_name = dataset.lower()+ "_" + arch + suffix
+        if dorefa:
+            raise ValueError ("Dorefa net unsupported for {}".format(arch))
+        else:
+            model = models.vgg19(pretrained=torch_weights)
+            model_name = dataset.lower()+ "_" + input_quant + "_" + arch + suffix
     elif(arch == 'torch_vgg19bn'):
-        model = models.vgg19_bn(pretrained=torch_weights)
-        model_name = dataset.lower()+ "_" + arch + suffix
-
+        if dorefa:
+            raise ValueError ("Dorefa net unsupported for {}".format(arch))
+        else:
+            model = models.vgg19_bn(pretrained=torch_weights)
+            model_name = dataset.lower()+ "_" + input_quant + "_" + arch + suffix
     #MOBILENET IMAGENET   
     elif(arch == 'torch_mobnet'):
-        model = models.mobilenet_v2(pretrained=torch_weights)
-        model_name = dataset.lower()+ "_" + arch + suffix
-
+        if dorefa:
+            raise ValueError ("Dorefa net unsupported for {}".format(arch))
+        else:
+            model = models.mobilenet_v2(pretrained=torch_weights)
+            model_name = dataset.lower()+ "_" + input_quant + "_" + arch + suffix
     #DENSENET IMAGENET
     elif(arch == 'torch_densenet121'):
-        model = models.densenet121(pretrained=torch_weights)
-        model_name = dataset.lower()+ "_" + arch + suffix
+        if dorefa:
+            raise ValueError ("Dorefa net unsupported for {}".format(arch))
+        else:
+            model = models.densenet121(pretrained=torch_weights)
+            model_name = dataset.lower()+ "_" + input_quant + "_" + arch + suffix
     elif(arch == 'torch_densenet169'):
-        model = models.densenet169(pretrained=torch_weights)
-        model_name = dataset.lower()+ "_" + arch + suffix
+        if dorefa:
+            raise ValueError ("Dorefa net unsupported for {}".format(arch))
+        else:
+            model = models.densenet169(pretrained=torch_weights)
+            model_name = dataset.lower()+ "_" + input_quant + "_" + arch + suffix
     elif(arch == 'torch_densenet201'):
-        model = models.densenet201(pretrained=torch_weights)
-        model_name = dataset.lower()+ "_" + arch + suffix
+        if dorefa:
+            raise ValueError ("Dorefa net unsupported for {}".format(arch))
+        else:
+            model = models.densenet201(pretrained=torch_weights)
+            model_name = dataset.lower()+ "_" + input_quant + "_" + arch + suffix
     elif(arch == 'torch_densenet161'):
-        model = models.densenet161(pretrained=torch_weights)
-        model_name = dataset.lower()+ "_" + arch + suffix
-
+        if dorefa:
+            raise ValueError ("Dorefa net unsupported for {}".format(arch))
+        else:
+            model = models.densenet161(pretrained=torch_weights)
+            model_name = dataset.lower()+ "_" + input_quant + "_" + arch + suffix
     #RESNET CIFAR   
     elif(arch == 'resnet' or arch == 'resnet18'  ):
-        model = ResNet18(num_classes=num_classes)
-        model_name = dataset.lower()+ "_" + arch + suffix
+        if dorefa:
+            model = ResNet18_Dorefa(num_classes=num_classes, abit=abit, wbit=wbit)
+            model_name = dataset.lower()+ "_" + input_quant + "_" + arch +"_a" + str(abit) + 'w'+ str(wbit) + suffix
+        else:
+            model = ResNet18(num_classes=num_classes)
+            model_name = dataset.lower()+ "_" + input_quant + "_" + arch + suffix
     elif( arch == 'resnet34'  ):
-        model = ResNet34(num_classes=num_classes)
-        model_name = dataset.lower()+ "_" + arch + suffix
+        if dorefa:
+            model = ResNet34_Dorefa(num_classes=num_classes, abit=abit, wbit=wbit)
+            model_name = dataset.lower()+ "_" + input_quant + "_" + arch +"_a" + str(abit) + 'w'+ str(wbit) + suffix
+        else:
+            model = ResNet34(num_classes=num_classes)
+            model_name = dataset.lower()+ "_" + input_quant + "_" + arch + suffix
     elif( arch == 'resnet50'  ):
-        model = ResNet50(num_classes=num_classes)
-        model_name = dataset.lower()+ "_" + arch + suffix
+        if dorefa:
+            model = ResNet50_Dorefa(num_classes=num_classes, abit=abit, wbit=wbit)
+            model_name = dataset.lower()+ "_" + input_quant + "_" + arch +"_a" + str(abit) + 'w'+ str(wbit) + suffix
+        else:
+            model = ResNet50(num_classes=num_classes)
+            model_name = dataset.lower()+ "_" + input_quant + "_" + arch + suffix
     elif( arch == 'resnet101'  ):
-        model = ResNet101(num_classes=num_classes)
-        model_name = dataset.lower()+ "_" + arch + suffix
+        if dorefa:
+            model = ResNet101_Dorefa(num_classes=num_classes, abit=abit, wbit=wbit)
+            model_name = dataset.lower()+ "_" + input_quant + "_" + arch +"_a" + str(abit) + 'w'+ str(wbit) + suffix
+        else:
+            model = ResNet101(num_classes=num_classes)
+            model_name = dataset.lower()+ "_" + input_quant + "_" + arch + suffix
     elif( arch == 'resnet152'  ):
-        model = ResNet152(num_classes=num_classes)
-        model_name = dataset.lower()+ "_" + arch + suffix
-
+        if dorefa:
+            model = ResNet152_Dorefa(num_classes=num_classes, abit=abit, wbit=wbit)
+            model_name = dataset.lower()+ "_" + input_quant + "_" + arch +"_a" + str(abit) + 'w'+ str(wbit) + suffix
+        else:
+            model = ResNet152(num_classes=num_classes)
+            model_name = dataset.lower()+ "_" + input_quant + "_" + arch + suffix
     #VGG CIFAR
     elif(arch[0:3] == 'vgg'):
         len_arch = len(arch)
@@ -140,26 +251,36 @@ def instantiate_model(dataset='cifar10',
             batch_norm_conv=False
             batch_norm_linear=False
             cfg= arch[3:len_arch]
-        model = vgg(cfg=cfg, batch_norm_conv=batch_norm_conv, batch_norm_linear=batch_norm_linear ,num_classes=num_classes)
-        model_name = dataset.lower()+ "_" + arch + suffix
-
+        if dorefa:
+            model = vgg_Dorefa(cfg=cfg, batch_norm_conv=batch_norm_conv, batch_norm_linear=batch_norm_linear ,num_classes=num_classes, a_bit=abit, w_bit=wbit)
+            model_name = dataset.lower()+ "_" + input_quant + "_" + arch +"_a" + str(abit) + 'w'+ str(wbit) + suffix
+            
+        else:   
+            model = vgg(cfg=cfg, batch_norm_conv=batch_norm_conv, batch_norm_linear=batch_norm_linear ,num_classes=num_classes)
+            model_name = dataset.lower()+ "_" + input_quant + "_" + arch + suffix
     # LENET MNIST
     elif (arch == 'lenet5'):
-        model = LeNet5(num_classes=num_classes)
-        model_name = dataset.lower()+ "_" + arch + suffix
+        if dorefa:
+            model = LeNet5_Dorefa(num_classes=num_classes, abit=abit, wbit=wbit)
+            model_name = dataset.lower()+ "_" + input_quant + "_" + arch +"_a" + str(abit) + 'w'+ str(wbit) + suffix
+        else:
+            model = LeNet5(num_classes=num_classes)
+            model_name = dataset.lower()+ "_" + input_quant + "_" + arch + suffix
     else:
         # Right way to handle exception in python see https://stackoverflow.com/questions/2052390/manually-raising-throwing-an-exception-in-python
         # Explains all the traps of using exception, does a good job!! I mean the link :)
         raise ValueError("Unsupported neural net architecture")
+    model = model.to(device)
     
     if load == True and torch_weights == False :
         print(" Using Model: " + arch)
         model_path = os.path.join('./pretrained/', dataset.lower(),  model_name + '.ckpt')
         model.load_state_dict(torch.load(model_path, map_location='cuda:0'))
         print(' Loaded trained model from :' + model_path)
+        print(' {}'.format(Q))
     
     else:
         model_path = os.path.join('./pretrained/', dataset.lower(),  model_name + '.ckpt')
         print(' Training model save at:' + model_path)
     print('')
-    return model, model_name
+    return model, model_name, Q

@@ -4,6 +4,9 @@
 @copyright: Nanoelectronics Research Laboratory
 """
 """"""
+import sys
+sys.path.append('../')
+
 import torch
 from utils.framework import Framework
 from utils.instantiate_model import instantiate_model

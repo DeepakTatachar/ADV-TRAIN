@@ -11,8 +11,6 @@ from torch.utils.data.dataloader import DataLoader
 from  utils.normalize import normalize, denormalize
 import numpy as np
 from torch.utils.data.sampler import SubsetRandomSampler
-from utils.simple_dataset import SimpleOnehot
-from utils.random_dataset import RandomDataset
 
 class load_dataset():
     def __init__(self,
@@ -103,9 +101,11 @@ class load_dataset():
         self.image_dimensions = dataset_info['image_dimensions']
         
 
-    def loader(self):
+    def loader(self, datapath=None):
         '''
         This function returns the dataset parameters for supported datasets
+        Args:
+            datapath(str) : path to the directory of imagenet/tinyimagenet.
 
         Returns:
             ``Returns`` a dictionary in the following format::
@@ -235,7 +235,10 @@ class load_dataset():
         elif(self.dataset == 'tinyimagenet'):
             mean = [0.485, 0.456, 0.406]
             std = [0.229, 0.224, 0.225]
-            root = './data/TinyImageNet/'
+            if datapath==None:
+                root = './data/TinyImageNet/'
+            else:
+                root=datapath
             img_dim = 64
             img_ch = 3
             num_classes = 200
@@ -261,8 +264,11 @@ class load_dataset():
         elif(self.dataset == 'imagenet'):
             mean = [0.485, 0.456, 0.406]
             std = [0.229, 0.224, 0.225]
-            datapath = '/local/a/imagenet/imagenet2012/'
-            #datapath = '/local/a/wponghir/dataset/imagenet2012/'
+            if datapath==None:
+                datapath = '/local/a/imagenet/imagenet2012/'
+                #datapath = '/local/a/wponghir/dataset/imagenet2012/'
+            else:
+                pass
             img_dim = 224
             img_ch = 3
             num_classes = 1000
@@ -286,45 +292,6 @@ class load_dataset():
             trainset = torchvision.datasets.ImageFolder(root=datapath + 'train', transform=train_transform)
             valset =  torchvision.datasets.ImageFolder(root=datapath + 'train', transform=train_transform)
             testset = torchvision.datasets.ImageFolder(root=datapath + 'val', transform=test_transform)
-        elif(self.dataset == 'simple'):
-            mean = [0]
-            std = [1]
-            img_dim = 32
-            img_ch = 1
-            num_classes = 4
-            num_worker = 40
-                    
-            test_transform =  transforms.Compose([
-                                                    transforms.ToTensor(),
-                                                ])
-            val_transform = test_transform
-            if self.augment:
-                train_transform = transforms.Compose([
-                                                        transforms.ToTensor()
-                                                    ])
-            else:
-                train_transform = test_transform
-
-            trainset = SimpleOnehot(train=True, transform=train_transform)
-            valset =  SimpleOnehot(train=False, transform=train_transform)
-            testset = SimpleOnehot(train=False, transform=test_transform)
-        elif(self.dataset == 'random'):
-            mean = [0]
-            std = [1]
-            img_dim = 32
-            img_ch = 1
-            num_classes = 10
-            num_worker = 10
-                    
-            test_transform =  transforms.Compose([
-                                                    transforms.ToTensor(),
-                                                ])
-            val_transform = test_transform
-            train_transform = test_transform
-
-            trainset = RandomDataset(train=True, transform=train_transform)
-            valset = RandomDataset(train=False, transform=train_transform)
-            testset = RandomDataset(train=False, transform=test_transform)
         else:
             # Right way to handle exception in python see https://stackoverflow.com/questions/2052390/manually-raising-throwing-an-exception-in-python
             # Explains all the traps of using exception, does a good job!! I mean the link :)

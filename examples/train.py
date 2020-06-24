@@ -4,12 +4,14 @@
 @copyright: Nanoelectronics Research Laboratory
 """
 """"""
+import sys
+sys.path.append('../')
+
 import torch
 from utils.framework import Framework
 from utils.instantiate_model import instantiate_model
 from utils.str2bool import str2bool
 import argparse
-
 
 parser = argparse.ArgumentParser(description='Train', formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 #training parameters
@@ -37,7 +39,12 @@ parser.add_argument('--suffix',         default='',         type=str,        hel
 parser.add_argument('--arch',           default='resnet',   type=str,        help='Network architecture')
 parser.add_argument('--pretrained',     default=False,      type=str2bool,   help='load saved model for ./pretrained/dataset/')
 parser.add_argument('--torch_weights',  default=False,      type=str2bool,   help='load torchvison weights for imagenet')
-
+parser.add_argument('--input_quant',    default=None,       type=str,       help='Quantization transfer function-Q1 Q2 Q4 Q6 Q8 HT FP')
+parser.add_argument('--dorefa',         default=False,      type=str2bool,  help='Use Dorefa Net')
+parser.add_argument('--qout',           default=False,      type=str2bool,  help='Output layer weight quantisation')
+parser.add_argument('--qin',            default=False,      type=str2bool,  help='Input layer weight quantisation')
+parser.add_argument('--abit',           default=32,         type=int,       help='activation quantisation precision')
+parser.add_argument('--wbit',           default=32,         type=int,       help='Weight quantisation precision')
 
 # Attack parameters
 parser.add_argument('--adv_trn',    default=False,      type=str2bool,  help='adv Training')
@@ -65,15 +72,23 @@ elif  args.dataset.lower()=='tinyimagenet':
 else:
     num_classes=10
 
-net, model_name = instantiate_model(dataset=args.dataset,
-                                    num_classes=num_classes, 
+net, model_name, Q = instantiate_model(dataset=args.dataset,
+                                    num_classes=num_classes,
+                                    input_quant=args.input_quant, 
                                     arch=args.arch,
+                                    dorefa=args.dorefa,
+                                    abit=args.abit,
+                                    wbit=args.wbit,
+                                    qin=args.qin,
+                                    qout=args.qout,
                                     suffix=args.suffix, 
                                     load=args.pretrained,
                                     torch_weights=args.torch_weights)
 
+
 framework = Framework(net=net,
                       model_name=model_name,
+                      preprocess=Q,
                       dataset=args.dataset,
                       epochs=args.epochs,
                       train_batch_size=args.train_batch_size,
