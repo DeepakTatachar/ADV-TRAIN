@@ -34,3 +34,5 @@ Modules
 .. autoclass:: advtrain.utils.preprocess.preprocess
    :members: forward, back_approx
 
+.. automodule:: advtrain.attack_framework.multi_lib_attacks
+   :members:

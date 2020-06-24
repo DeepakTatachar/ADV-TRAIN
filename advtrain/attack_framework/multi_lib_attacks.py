@@ -13,12 +13,11 @@ from advtrain.attack_framework.attacks import LinfPGDAttack_with_normalization, 
 from advertorch.utils import NormalizeByChannelMeanStd
 from advertorch.bpda import BPDAWrapper
 
-'''
-    This is a LAL (Library Abstraction Layer)
-    Wrapper around foolbox, advertorch and custom attack implementation
-'''
 class attack_wrapper():
     '''
+    This is a LAL (Library Abstraction Layer)
+    Wrapper around foolbox, advertorch and custom attack implementation
+    
     Example of attack_params
     {
         'lib': 'foolbox',
