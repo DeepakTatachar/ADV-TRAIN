@@ -8,9 +8,9 @@ import sys
 sys.path.append('../')
 
 import torch
-from utils.framework import Framework
-from utils.instantiate_model import instantiate_model
-from utils.str2bool import str2bool
+from advtrain.framework import Framework
+from advtrain.instantiate_model import instantiate_model
+from advtrain.utils.str2bool import str2bool
 import argparse
 
 parser = argparse.ArgumentParser(description='Train', formatter_class=argparse.ArgumentDefaultsHelpFormatter)

@@ -8,10 +8,10 @@ import sys
 sys.path.append('../')
 
 import torch
-from utils.framework import Framework
-from utils.instantiate_model import instantiate_model
-from utils.str2bool import str2bool
-from utils.boundary_visualization_extension import VisualizeBoundaries
+from advtrain.framework import Framework
+from advtrain.instantiate_model import instantiate_model
+from advtrain.utils.str2bool import str2bool
+from advtrain.boundary_visualization import VisualizeBoundaries
 import argparse
 
 parser = argparse.ArgumentParser(description='Train', formatter_class=argparse.ArgumentDefaultsHelpFormatter)
