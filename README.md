@@ -36,11 +36,14 @@ Open this in any web browser. This project uses Sphnix to autogenerate this docu
 
 ### Running Examples
 
-This repo has examples on how to train and visualize boundaries in /examples folder. To run then move them to the root folder.
-When using the training code please create the following folder structure in the root directory
+This repo has examples on how to train and visualize boundaries in /examples folder.
+When using the training code please create the following folder structure in the root directory (this is autommatically created)
 
 ```
 /pretrained/<dataset name in small letters>/temp
 ```
 
 This lets the framework store the models with the nomenclature datasetname_architecture_suffix.ckpt. The temp folder contains information stored by the framework for resume support.
+
+### Pretrained Models
+We provide pretrained models in ./pretrained folder

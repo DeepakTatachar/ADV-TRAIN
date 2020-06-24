@@ -7,7 +7,7 @@ modified from https://github.com/pytorch/vision/blob/master/torchvision/models/r
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from utils.quant_dorefa import *
+from advtrain.utils.quant_dorefa import *
 
 class BasicBlock(nn.Module):
     expansion = 1

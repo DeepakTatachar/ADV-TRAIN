@@ -2,15 +2,15 @@
 @author:  Deepak Ravikumar Tatachar, Sangamesh Kodge
 @copyright: Nanoelectronics Research Laboratory
 """
-import torch
-from models.AlexNet import *
-from models.resnet import *
-from models.lenet5 import *
-from models.vgg import *
-import torchvision.models as models
-from utils.quantise import Quantise2d
 import os
-from utils.preprocess import preprocess as PreProcess
+import torch
+from advtrain.models.AlexNet import *
+from advtrain.models.resnet import *
+from advtrain.models.lenet5 import *
+from advtrain.models.vgg import *
+import torchvision.models as models
+from advtrain.utils.quantise import Quantise2d
+from advtrain.utils.preprocess import preprocess as PreProcess
 
 def instantiate_model (dataset='cifar10',
                        num_classes=10, 

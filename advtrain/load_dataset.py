@@ -8,7 +8,7 @@ import torch
 import torchvision
 import torchvision.transforms as transforms
 from torch.utils.data.dataloader import DataLoader
-from  utils.normalize import normalize, denormalize
+from  advtrain.utils.normalize import normalize, denormalize
 import numpy as np
 from torch.utils.data.sampler import SubsetRandomSampler
 

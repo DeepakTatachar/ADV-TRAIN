@@ -16,21 +16,21 @@ Indices and tables
 Modules
 ==================
 
-.. automodule:: utils.normalize
+.. automodule:: advtrain.utils.normalize
    :members:
 
-.. automodule:: utils.framework
+.. automodule:: advtrain.framework
    :members:
 
-.. automodule:: utils.instantiate_model
+.. automodule:: advtrain.instantiate_model
    :members:
 
-.. autoclass:: utils.framework.Framework
+.. autoclass:: advtrain.framework.Framework
    :members: train, test, validate, __init__
 
-.. autoclass:: utils.boundary_visualization_extension.VisualizeBoundaries
+.. autoclass:: advtrain.boundary_visualization.VisualizeBoundaries
    :members: generate_decision_boundaries, __init__, show
 
-.. autoclass:: utils.preprocess.preprocess
+.. autoclass:: advtrain.utils.preprocess.preprocess
    :members: forward, back_approx
 

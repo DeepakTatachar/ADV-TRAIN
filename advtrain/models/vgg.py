@@ -8,12 +8,11 @@ import torch.nn.init as init
 
 import torch
 import torch.nn.functional as F
-from utils.quant_dorefa import *
+from advtrain.utils.quant_dorefa import *
 # __all__ = [
 #     'VGG', 'vgg11', 'vgg11_bn', 'vgg13', 'vgg13_bn', 'vgg16', 'vgg16_bn', 'vgg16_bn_pruned',
 #     'vgg19_bn', 'vgg19',
 # ]
-
 
 class vgg(nn.Module):
     '''

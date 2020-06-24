@@ -5,10 +5,10 @@
 """
 """"""
 import torch
-from utils.load_dataset import load_dataset
+from advtrain.load_dataset import load_dataset
 import matplotlib.pyplot as plt
-from utils.attack_framework.multi_lib_attacks import attack_wrapper
-from utils.preprocess import preprocess as PreProcess
+from advtrain.attack_framework.multi_lib_attacks import attack_wrapper
+from advtrain.utils.preprocess import preprocess as PreProcess
 import os
 
 
@@ -435,6 +435,7 @@ class Framework():
             if(epoch_hook):
                 epoch_hook(self)
 
-        # Load the most optimum weights found during training
-        saved_training_state = torch.load('./pretrained/'+ self.dataset +'/temp/' + self.model_name  + '.temp')
-        self.net.load_state_dict(saved_training_state['model'])
+        if(self.num_epochs > 0):
+            # Load the most optimum weights found during training
+            saved_training_state = torch.load('./pretrained/'+ self.dataset +'/temp/' + self.model_name  + '.temp')
+            self.net.load_state_dict(saved_training_state['model'])

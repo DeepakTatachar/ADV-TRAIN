@@ -4,7 +4,7 @@
 """
 
 import torch.nn as nn
-from utils.quant_dorefa import *
+from advtrain.utils.quant_dorefa import *
 
 class LeNet5(nn.Module):
 

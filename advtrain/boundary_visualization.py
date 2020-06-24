@@ -1,7 +1,9 @@
+""""""
 """
 @author: Deepak Ravikumar Tatachar 
 @copyright: Nanoelectronics Research Laboratory
 """
+""""""
 import matplotlib.pyplot as plt
 import torch
 import torch.nn as nn
@@ -11,8 +13,8 @@ import numpy as np
 import argparse
 import os
 import copy
-from utils.str2bool import str2bool
-from utils.str2bool import str2bool
+from advtrain.utils.str2bool import str2bool
+from advtrain.utils.str2bool import str2bool
 
 class VisualizeBoundaries():
     def __init__(self, 

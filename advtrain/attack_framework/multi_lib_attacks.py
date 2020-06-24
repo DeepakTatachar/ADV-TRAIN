@@ -1,16 +1,17 @@
+""""""
 """
 @author: Deepak Ravikumar Tatachar
 @copyright: Nanoelectronics Research Laboratory
 """
+""""""
 import torch
 import torch.nn as nn
 import foolbox
 import numpy as np
 import advertorch
-from utils.attack_framework.attacks import LinfPGDAttack_with_normalization, LinfRandAttack_with_normalization
+from advtrain.attack_framework.attacks import LinfPGDAttack_with_normalization, LinfRandAttack_with_normalization
 from advertorch.utils import NormalizeByChannelMeanStd
 from advertorch.bpda import BPDAWrapper
-
 
 '''
     This is a LAL (Library Abstraction Layer)
@@ -28,7 +29,7 @@ class attack_wrapper():
         'bpda': True,
         'random': True
         'preprocess': <pointer to quantize or hafltone or FP>,
-        'custom_norm_func': <pointer to custom_3channel_img_normalization_with_dataset_params>,
+        'custom_norm_func': <pointer to normalize>,
         'targeted': True,
     }
 
