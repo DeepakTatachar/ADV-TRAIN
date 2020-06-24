@@ -14,6 +14,11 @@ Read the latest documentation at https://adv-train.readthedocs.io/en/latest/
 
 ### Installing
 
+To install the pip package use the command
+```
+pip install advtrain
+```
+Or a clones repo and use the requirements.txt to download the required packages
 Requirements are listed in requirements.txt. Use the command
 
 ```
@@ -24,7 +29,7 @@ to install all required dependencies
 ### Documentation
 Read the latest documentation at https://adv-train.readthedocs.io/en/latest/
 
-To read the documentation, navigate to /docs and type
+To locally make the documentation, navigate to /docs and type
 
 ```
 make html
@@ -46,4 +51,8 @@ When using the training code please create the following folder structure in the
 This lets the framework store the models with the nomenclature datasetname_architecture_suffix.ckpt. The temp folder contains information stored by the framework for resume support.
 
 ### Pretrained Models
-We provide pretrained models in ./pretrained folder
+We provide pretrained models in ./pretrained folder. These models have various weight quantized VGG and ResNet models, named according to the naming convention
+```
+datasetname_inputQuant_architecture_activationQuant_weightQuant.ckpt
+```
+When running you program using advtrain, place the models in the (current working directory) cwd/pretrained/dataset_name and when load is set to true in instantiate_model it will automatically load the correct model.
