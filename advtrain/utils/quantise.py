@@ -1,5 +1,6 @@
 """
 @author:  Sangamesh Kodge
+
 @copyright: Nanoelectronics Research Laboratory
 """
 
@@ -7,7 +8,17 @@ import torch
 import torch.nn as nn
 
 class Quantise2d(nn.Module):
+
     def __init__(self, n_bits=1, quantise=True, un_normalized=False):
+        """This is a class that quantizes the input 
+        
+        Args:
+            n_bits (int)        : bit precision of input quantization
+            quantise (bool)     : True for quantization false for passing the input as is
+            un_normalized(bool) : True if input is un_normalized i.e between [0, 255], false otherwise.
+        Returns:
+            Returns an object of the Quantise2d
+        """   
         
         super(Quantise2d, self).__init__()
         assert n_bits <= 8.0
@@ -17,6 +28,14 @@ class Quantise2d(nn.Module):
         
     
     def forward(self, data):
+        """This is a function that quantizes the input 
+
+        Args:
+            data(tensor)    : input data to be quantized
+
+        Returns:
+            Returns quantized tensor
+        """   
         if self.quantise:
             if self.un_normalized and self.n_bits<8:
 
@@ -38,6 +57,15 @@ class Quantise2d(nn.Module):
         return data
     
     def back_approx(self, x):
+        """This is a function does a linear backward pass approximation for quantization
+        
+        Args:
+            data(tensor)    : input data for backprop
+            
+        Returns:
+            Returns backprop tensor tensor
+        """ 
+        
         return x
 
     def __repr__(self):
