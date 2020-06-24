@@ -26,6 +26,17 @@ parser.add_argument('--loss',                   default='crossentropy',     type
 parser.add_argument('--resume',                 default=False,              type=str2bool,  help='resume training from a saved checkpoint')
 parser.add_argument('--include_validation',     default=False,              type=str2bool,  help='retrains with validation set')
 
+# Attack parameters
+parser.add_argument('--adv_trn',    default=False,      type=str2bool,  help='adv Training')
+parser.add_argument('--attack',     default='PGD',      type=str,       help='Type of attack [PGD, CW]')
+parser.add_argument('--lib',        default='custom',   type=str,       help='Use [foolbox, advtorch, custom] code for adversarial attack')
+parser.add_argument('--use_bpda',   default=True,       type=str2bool,  help='Use Backward Pass through Differential Approximation when using attack')
+parser.add_argument('--random',     default=True,       type=str2bool,  help='Random seed/strating points')
+parser.add_argument('--iterations', default=40,         type=int,       help='Number of iterations of PGD')
+parser.add_argument('--epsilon',    default=0.031,      type=float,     help='epsilon for PGD')
+parser.add_argument('--targeted',   default=None,       type=int,       help='Target class for targeted attack, None for non targeted attack')
+parser.add_argument('--stepsize',   default=0.01,       type=float,     help='stepsize for attack')
+
 # Dataloader args
 parser.add_argument('--train_batch_size',       default=512,    type=int,       help='Train batch size')
 parser.add_argument('--test_batch_size',        default=512,    type=int,       help='Test batch size')
@@ -40,6 +51,13 @@ parser.add_argument('--suffix',         default='',         type=str,        hel
 parser.add_argument('--arch',           default='resnet',   type=str,        help='Network architecture')
 parser.add_argument('--pretrained',     default=False,      type=str2bool,   help='load saved model for ./pretrained/dataset/')
 parser.add_argument('--torch_weights',  default=False,      type=str2bool,   help='load torchvison weights for imagenet')
+parser.add_argument('--input_quant',    default=None,       type=str,       help='Quantization transfer function-Q1 Q2 Q4 Q6 Q8 HT FP')
+parser.add_argument('--dorefa',         default=False,      type=str2bool,  help='Use Dorefa Net')
+parser.add_argument('--qout',           default=False,      type=str2bool,  help='Output layer weight quantisation')
+parser.add_argument('--qin',            default=False,      type=str2bool,  help='Input layer weight quantisation')
+parser.add_argument('--abit',           default=32,         type=int,       help='activation quantisation precision')
+parser.add_argument('--wbit',           default=32,         type=int,       help='Weight quantisation precision')
+
 
 global args
 args = parser.parse_args()
@@ -59,15 +77,21 @@ elif  args.dataset.lower()=='tinyimagenet':
 else:
     num_classes=10
 
-net, model_name = instantiate_model(dataset=args.dataset,
-                                    num_classes=num_classes, 
+net, model_name, Q = instantiate_model(dataset=args.dataset,
+                                    num_classes=num_classes,
+                                    input_quant=args.input_quant, 
                                     arch=args.arch,
+                                    dorefa=args.dorefa,
+                                    abit=args.abit,
+                                    wbit=args.wbit,
+                                    qin=args.qin,
+                                    qout=args.qout,
                                     suffix=args.suffix, 
                                     load=args.pretrained,
                                     torch_weights=args.torch_weights)
-
 framework = Framework(net=net,
                       model_name=model_name,
+                      preprocess=Q,
                       dataset=args.dataset,
                       epochs=args.epochs,
                       train_batch_size=args.train_batch_size,
@@ -80,7 +104,15 @@ framework = Framework(net=net,
                       optimizer=args.optimizer,
                       loss=args.loss,
                       learning_rate=args.lr,
-                      adversarial_training=False,
+                      adversarial_training=args.adv_trn,
+                      lib = args.lib,
+                      attack=args.attack,
+                      iterations=args.iterations,
+                      epsilon=args.epsilon,
+                      stepsize=args.stepsize,
+                      use_bpda=args.use_bpda,
+                      target=args.targeted,
+                      random=args.random,
                       device=None)
 
 framework.train(epoch_hook=epoch_hook,
