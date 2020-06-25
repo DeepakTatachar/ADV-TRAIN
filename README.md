@@ -8,7 +8,7 @@ Read the latest documentation at https://adv-train.readthedocs.io/en/latest/
 - It is very easy to use and well documented and tested
 - The framework supports resume (Yes you can restart training from where ever you left off when your server crashed!). 
 - The framework also implements support for train/validation splits of your choice with early stopping baked in. 
-- Single argument change for using different datasets and models i.e. convinence at you fingertips
+- Single argument change for using different datasets and models i.e. convenience at you fingertips
 - Dataloader parameters optimized for highest possbile performance when traning.
 - Supports multi-gpu training (single parameter update required)
 

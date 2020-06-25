@@ -17,4 +17,4 @@ python train.py --arch=vgg19 --dataset=cifar100 --input_quant=Q4 --wbit=Q4 --epo
 The train.py is a very versatile tool for DL-Researchers
 
 ## visualize_boundaries.py
-This is an example, which trains the model and then visualizes the decision boundaries around the inputs.
+This is an example, which trains the model and then visualizes the decision boundaries around the inputs. (Kindly refer to Section 6 of the paper https://arxiv.org/pdf/1611.02770.pdf)
