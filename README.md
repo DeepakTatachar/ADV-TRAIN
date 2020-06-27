@@ -23,7 +23,7 @@ pip install advtrain
 
 To clone the repo, it is recommended to use a shallow clone, this is recommended as previous versions have hosted large pretrained models
 ```
-git clone --depth <specify depth>
+git clone --depth <specify depth> https://github.com/DeepakTatachar/ADV-TRAIN
 ```
 
 Requirements are listed in requirements.txt. Use the command
