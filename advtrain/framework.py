@@ -31,6 +31,7 @@ class Framework():
                  loss='crossentropy',
                  learning_rate=0.01,
                  adversarial_training=False,
+                 adversarial_testing=False,
                  lib = 'custom',
                  attack='PGD',
                  iterations=40,
@@ -83,6 +84,7 @@ class Framework():
         self.optimizer_name = optimizer
         self.learning_rate = learning_rate
         self.adversarial_training = adversarial_training
+        self.adversarial_testing = adversarial_testing
 
         if(device is None):
             self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
@@ -123,7 +125,7 @@ class Framework():
             self.preprocess =preprocess
 
         self.target=target
-        if adversarial_training:
+        if self.adversarial_training or self.adversarial_testing:
             if self.target==None:
                 self.targeted=False
             else:
@@ -250,14 +252,18 @@ class Framework():
         total = 0
         torch.cuda.empty_cache()
         
-        with torch.no_grad():
-            for batch_idx, (data, labels) in enumerate(self.test_loader):
-                data = data.to(self.device)
-                labels = labels.to(self.device)
-                self.current_batch_data['data'] = data
-                self.current_batch_data['labels'] = labels
+        for batch_idx, (data, labels) in enumerate(self.test_loader):
+            data = data.to(self.device)
+            labels = labels.to(self.device)
+            self.current_batch_data['data'] = data
+            self.current_batch_data['labels'] = labels
+            # Generate adversarial image
+            if self.adversarial_testing:
+                perturbed_data, un_norm_perturbed_data = self.attack.generate_adversary(data, labels, adv_train_model = self.net, targeted=self.targeted, target_class=self.target )
+                data = self.preprocess(perturbed_data).to(self.device)
+            else:
                 data = self.preprocess(self.normalize(data))
-                out = self.net(data)
+            out = self.net(data)
 
         accuracy = float(correct) * 100.0 / float(total)
         return correct, total, accuracy
@@ -279,21 +285,24 @@ class Framework():
         running_loss = 0
         batches = 0
         torch.cuda.empty_cache()
-        with torch.no_grad():
-            for batch_idx, (data, labels) in enumerate(self.val_loader):
-                data = data.to(self.device)
-                labels = labels.to(self.device)
-                self.current_batch_data['data'] = data
-                self.current_batch_data['labels'] = labels
-                data = self.preprocess(self.normalize(data))
-                out = self.net(data)
-                loss = self.criterion(out, labels)
-                running_loss += loss.item()
-                batches += 1
-            
-                _, pred = torch.max(out, dim=1)
-                correct += (pred == labels).sum().item()
-                total += labels.size()[0]
+        for batch_idx, (data, labels) in enumerate(self.val_loader):
+            data = data.to(self.device)
+            labels = labels.to(self.device)
+            self.current_batch_data['data'] = data
+            self.current_batch_data['labels'] = labels
+            # Generate adversarial image
+            if self.adversarial_testing:
+                perturbed_data, un_norm_perturbed_data = self.attack.generate_adversary(data, labels, adv_train_model = self.net, targeted=self.targeted, target_class=self.target )
+                data = self.preprocess(perturbed_data).to(self.device)
+            else:
+                data = self.preprocess(self.normalize(data))out = self.net(data)
+            loss = self.criterion(out, labels)
+            running_loss += loss.item()
+            batches += 1
+        
+            _, pred = torch.max(out, dim=1)
+            correct += (pred == labels).sum().item()
+            total += labels.size()[0]
         accuracy = float(correct) * 100.0 / float(total)
         average_loss = running_loss / batches
         return correct, total, accuracy, average_loss
