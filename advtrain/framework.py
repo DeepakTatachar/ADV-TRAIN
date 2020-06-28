@@ -252,6 +252,9 @@ class Framework():
         correct = 0
         total = 0
         torch.cuda.empty_cache()
+        if self.adversarial_testing:
+            L2=0
+            Linf=0
         
         for batch_idx, (data, labels) in enumerate(self.test_loader):
             data = data.to(self.device)
@@ -261,12 +264,18 @@ class Framework():
             # Generate adversarial image
             if self.adversarial_testing:
                 perturbed_data, un_norm_perturbed_data = self.attack.generate_adversary(data, labels, adv_train_model = self.net, targeted=self.targeted, target_class=self.target )
+                L2 += torch.sum(torch.norm(data - un_norm_perturbed_data, p=2, dim=(1,2,3)))
+                Linf += torch.sum(torch.norm(data - un_norm_perturbed_data, p=float('inf'), dim=(1,2,3)))
                 data = self.preprocess(perturbed_data).to(self.device)
             else:
                 data = self.preprocess(self.normalize(data))
             out = self.net(data)
 
         accuracy = float(correct) * 100.0 / float(total)
+        if self.adversarial_testing:
+            norm_2 = float(L2.item())/ float(total)
+            norm_inf = float(Linf.item())/ float(total)
+            return correct, total, accuracy, norm_2, norm_inf
         return correct, total, accuracy
 
     def validate(self):
@@ -286,6 +295,10 @@ class Framework():
         running_loss = 0
         batches = 0
         torch.cuda.empty_cache()
+        if self.adversarial_testing:
+            L2=0
+            Linf=0
+            
         for batch_idx, (data, labels) in enumerate(self.val_loader):
             data = data.to(self.device)
             labels = labels.to(self.device)
@@ -294,6 +307,8 @@ class Framework():
             # Generate adversarial image
             if self.adversarial_testing:
                 perturbed_data, un_norm_perturbed_data = self.attack.generate_adversary(data, labels, adv_train_model = self.net, targeted=self.targeted, target_class=self.target )
+                L2 += torch.sum(torch.norm(data - un_norm_perturbed_data, p=2, dim=(1,2,3)))
+                Linf += torch.sum(torch.norm(data - un_norm_perturbed_data, p=float('inf'), dim=(1,2,3)))
                 data = self.preprocess(perturbed_data).to(self.device)
             else:
                 data = self.preprocess(self.normalize(data))out = self.net(data)
@@ -306,6 +321,10 @@ class Framework():
             total += labels.size()[0]
         accuracy = float(correct) * 100.0 / float(total)
         average_loss = running_loss / batches
+        if self.adversarial_testing:
+            norm_2 = float(L2.item())/ float(total)
+            norm_inf = float(Linf.item())/ float(total)
+            return correct, total, accuracy, norm_2, norm_inf
         return correct, total, accuracy, average_loss
 
     def train(self,
