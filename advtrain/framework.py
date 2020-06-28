@@ -258,9 +258,7 @@ class Framework():
                 self.current_batch_data['labels'] = labels
                 data = self.preprocess(self.normalize(data))
                 out = self.net(data)
-            _, pred = torch.max(out, dim=1)
-            correct += (pred == labels).sum().item()
-            total += labels.size()[0]
+
         accuracy = float(correct) * 100.0 / float(total)
         return correct, total, accuracy
 
@@ -293,9 +291,9 @@ class Framework():
                 running_loss += loss.item()
                 batches += 1
             
-            _, pred = torch.max(out, dim=1)
-            correct += (pred == labels).sum().item()
-            total += labels.size()[0]
+                _, pred = torch.max(out, dim=1)
+                correct += (pred == labels).sum().item()
+                total += labels.size()[0]
         accuracy = float(correct) * 100.0 / float(total)
         average_loss = running_loss / batches
         return correct, total, accuracy, average_loss
