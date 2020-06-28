@@ -56,7 +56,8 @@ class Framework():
             random_seed (int): Fixes the shuffle seed for reproducing the results
             optimizer (str): Name of the optimizer to use
             loss (str): Name of the loss to use for training
-            adversarial_training (bool): True for adversaril training
+            adversarial_training (bool): True for adversarial training
+            adversarial_testing (bool): True for adversarial inference to test the robustness of a pretrained model.
             lib (str): select the implementing library custom, advertorch or foolbox
             attack(str): select the attack type PGD,CW,...
             iterations(int): Number of iterations for the attack
