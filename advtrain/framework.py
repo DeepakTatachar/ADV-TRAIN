@@ -31,7 +31,6 @@ class Framework():
                  loss='crossentropy',
                  learning_rate=0.01,
                  adversarial_training=False,
-                 adversarial_testing=False,
                  lib = 'custom',
                  attack='PGD',
                  iterations=40,
@@ -57,7 +56,6 @@ class Framework():
             optimizer (str): Name of the optimizer to use
             loss (str): Name of the loss to use for training
             adversarial_training (bool): True for adversarial training
-            adversarial_testing (bool): True for adversarial inference to test the robustness of a pretrained model.
             lib (str): select the implementing library custom, advertorch or foolbox
             attack(str): select the attack type PGD,CW,...
             iterations(int): Number of iterations for the attack
@@ -85,8 +83,7 @@ class Framework():
         self.optimizer_name = optimizer
         self.learning_rate = learning_rate
         self.adversarial_training = adversarial_training
-        self.adversarial_testing = adversarial_testing
-
+        
         if(device is None):
             self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
         else:
@@ -126,7 +123,7 @@ class Framework():
             self.preprocess =preprocess
 
         self.target=target
-        if self.adversarial_training or self.adversarial_testing:
+        if self.adversarial_training :
             if self.target==None:
                 self.targeted=False
             else:
@@ -238,6 +235,40 @@ class Framework():
         else:
             raise ValueError ("Unsupported Optimizer")
 
+    def adversarial_attack(self):
+        """Adversarial Inference function
+
+        Returns:
+            correct, total, accuracy.
+            correct (int), the number of correctly classifed images
+            total (int), the total number of images in the test set
+            accuracy (float), accuracy in %
+        """
+        self.net = self.net.to(self.device)
+        self.net.eval()
+        correct = 0
+        total = 0
+        torch.cuda.empty_cache()
+        L2=0
+        Linf=0
+        
+        for batch_idx, (data, labels) in enumerate(self.test_loader):
+            data = data.to(self.device)
+            labels = labels.to(self.device)
+            self.current_batch_data['data'] = data
+            self.current_batch_data['labels'] = labels
+            # Generate adversarial image
+            perturbed_data, un_norm_perturbed_data = self.attack.generate_adversary(data, labels, adv_train_model = self.net, targeted=self.targeted, target_class=self.target )
+            L2 += torch.sum(torch.norm(data - un_norm_perturbed_data, p=2, dim=(1,2,3)))
+            Linf += torch.sum(torch.norm(data - un_norm_perturbed_data, p=float('inf'), dim=(1,2,3)))
+            data = self.preprocess(perturbed_data).to(self.device)
+            out = self.net(data)
+
+        accuracy = float(correct) * 100.0 / float(total)
+        norm_2 = float(L2.item())/ float(total)
+        norm_inf = float(Linf.item())/ float(total)
+        return correct, total, accuracy, norm_2, norm_inf
+        
     def test(self):
         """Evaluates network performance and returns the accuracy of the network
 
@@ -252,30 +283,20 @@ class Framework():
         correct = 0
         total = 0
         torch.cuda.empty_cache()
-        if self.adversarial_testing:
-            L2=0
-            Linf=0
-        
-        for batch_idx, (data, labels) in enumerate(self.test_loader):
-            data = data.to(self.device)
-            labels = labels.to(self.device)
-            self.current_batch_data['data'] = data
-            self.current_batch_data['labels'] = labels
-            # Generate adversarial image
-            if self.adversarial_testing:
-                perturbed_data, un_norm_perturbed_data = self.attack.generate_adversary(data, labels, adv_train_model = self.net, targeted=self.targeted, target_class=self.target )
-                L2 += torch.sum(torch.norm(data - un_norm_perturbed_data, p=2, dim=(1,2,3)))
-                Linf += torch.sum(torch.norm(data - un_norm_perturbed_data, p=float('inf'), dim=(1,2,3)))
-                data = self.preprocess(perturbed_data).to(self.device)
-            else:
+        with torch.no_grad():
+            for batch_idx, (data, labels) in enumerate(self.test_loader):
+                data = data.to(self.device)
+                labels = labels.to(self.device)
+                self.current_batch_data['data'] = data
+                self.current_batch_data['labels'] = labels
+                # Generate adversarial image
                 data = self.preprocess(self.normalize(data))
-            out = self.net(data)
-
+                out = self.net(data)
+                
+                _, pred = torch.max(out, dim=1)
+                correct += (pred == labels).sum().item()
+                total += labels.size()[0]
         accuracy = float(correct) * 100.0 / float(total)
-        if self.adversarial_testing:
-            norm_2 = float(L2.item())/ float(total)
-            norm_inf = float(Linf.item())/ float(total)
-            return correct, total, accuracy, norm_2, norm_inf
         return correct, total, accuracy
 
     def validate(self):
@@ -295,36 +316,25 @@ class Framework():
         running_loss = 0
         batches = 0
         torch.cuda.empty_cache()
-        if self.adversarial_testing:
-            L2=0
-            Linf=0
-            
-        for batch_idx, (data, labels) in enumerate(self.val_loader):
-            data = data.to(self.device)
-            labels = labels.to(self.device)
-            self.current_batch_data['data'] = data
-            self.current_batch_data['labels'] = labels
-            # Generate adversarial image
-            if self.adversarial_testing:
-                perturbed_data, un_norm_perturbed_data = self.attack.generate_adversary(data, labels, adv_train_model = self.net, targeted=self.targeted, target_class=self.target )
-                L2 += torch.sum(torch.norm(data - un_norm_perturbed_data, p=2, dim=(1,2,3)))
-                Linf += torch.sum(torch.norm(data - un_norm_perturbed_data, p=float('inf'), dim=(1,2,3)))
-                data = self.preprocess(perturbed_data).to(self.device)
-            else:
-                data = self.preprocess(self.normalize(data))out = self.net(data)
-            loss = self.criterion(out, labels)
-            running_loss += loss.item()
-            batches += 1
         
-            _, pred = torch.max(out, dim=1)
-            correct += (pred == labels).sum().item()
-            total += labels.size()[0]
-        accuracy = float(correct) * 100.0 / float(total)
-        average_loss = running_loss / batches
-        if self.adversarial_testing:
-            norm_2 = float(L2.item())/ float(total)
-            norm_inf = float(Linf.item())/ float(total)
-            return correct, total, accuracy, norm_2, norm_inf
+        with torch.no_grad():
+            for batch_idx, (data, labels) in enumerate(self.val_loader):
+                data = data.to(self.device)
+                labels = labels.to(self.device)
+                self.current_batch_data['data'] = data
+                self.current_batch_data['labels'] = labels
+                # Generate adversarial image
+                data = self.preprocess(self.normalize(data))
+                out = self.net(data)
+                loss = self.criterion(out, labels)
+                running_loss += loss.item()
+                batches += 1
+            
+                _, pred = torch.max(out, dim=1)
+                correct += (pred == labels).sum().item()
+                total += labels.size()[0]
+            accuracy = float(correct) * 100.0 / float(total)
+            average_loss = running_loss / batches
         return correct, total, accuracy, average_loss
 
     def train(self,
