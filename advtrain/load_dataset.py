@@ -9,6 +9,7 @@ import torchvision
 import torchvision.transforms as transforms
 from torch.utils.data.dataloader import DataLoader
 from  advtrain.utils.normalize import normalize, denormalize
+from advtrain.utils.tinyimagenet import TinyImageNet
 import numpy as np
 from torch.utils.data.sampler import SubsetRandomSampler
 
@@ -258,9 +259,9 @@ class load_dataset():
             else:
                 train_transform= test_transform
 
-            trainset = TinyImageNet(root=root + '/val/', train_root=root + '/train/', transform=test_transform, val=False) 
-            valset =  TinyImageNet(root=root + '/val/', train_root=root + '/train/', transform=test_transform, val=False) 
-            testset = TinyImageNet(root=root + '/val/', train_root=root + '/train/', transform=test_transform, val=True)
+            trainset = TinyImageNet(root=root, transform=test_transform, train=True) 
+            valset = TinyImageNet(root=root, transform=test_transform, train=True) 
+            testset = TinyImageNet(root=root, transform=test_transform, train=False)
         elif(self.dataset == 'imagenet'):
             mean = [0.485, 0.456, 0.406]
             std = [0.229, 0.224, 0.225]

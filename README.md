@@ -8,7 +8,7 @@ Read the latest documentation at https://adv-train.readthedocs.io/en/latest/
 - It is very easy to use and well documented and tested
 - The framework supports resume (Yes you can restart training from where ever you left off when your server crashed!). 
 - The framework also implements support for train/validation splits of your choice with early stopping baked in. 
-- Single argument change for using different datasets and models i.e. convinence at you fingertips
+- Single argument change for using different datasets and models i.e. convenience at you fingertips
 - Dataloader parameters optimized for highest possbile performance when traning.
 - Supports multi-gpu training (single parameter update required)
 
@@ -18,7 +18,14 @@ To install the pip package use the command
 ```
 pip install advtrain
 ```
-Or a clones repo and use the requirements.txt to download the required packages
+
+### Contributing
+
+To clone the repo, it is recommended to use a shallow clone, this is recommended as previous versions have hosted large pretrained models
+```
+git clone --depth <specify depth> https://github.com/DeepakTatachar/ADV-TRAIN
+```
+
 Requirements are listed in requirements.txt. Use the command
 
 ```
@@ -41,17 +48,10 @@ Open this in any web browser. This project uses Sphnix to autogenerate this docu
 
 ### Running Examples
 
-This repo has examples on how to train and visualize boundaries in /examples folder.
-When using the training code please create the following folder structure in the root directory (this is autommatically created)
-
-```
-/pretrained/<dataset name in small letters>/temp
-```
-
-This lets the framework store the models with the nomenclature datasetname_architecture_suffix.ckpt. The temp folder contains information stored by the framework for resume support.
+This repo also has examples on how to train and visualize boundaries in /examples folder. A readme file is provided in the ./examples folder to help out with using and running the examples.
 
 ### Pretrained Models
-We provide pretrained models in ./pretrained folder. These models have various weight quantized VGG and ResNet models, named according to the naming convention
+We provide pretrained models in a previous version of the repo. It is "hosted" [here](https://github.com/DeepakTatachar/ADV-TRAIN/tree/993c85a80694bcc195526f29f04c1ea80f577437/pretrained). These models have various weight quantized VGG and ResNet models, named according to the naming convention
 ```
 datasetname_inputQuant_architecture_activationQuant_weightQuant.ckpt
 ```
