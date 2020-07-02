@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="advtrain",
-    version="0.0.1",
+    version="0.0.2",
     author="Deepak Tatachar, Sangamesh Kodge",
     author_email="dravikum@purdue.edu",
     description="ADV-TRAIN is Deep Vision TRaining And INference framework",
