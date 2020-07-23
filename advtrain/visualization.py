@@ -130,7 +130,7 @@ class Visualize():
         elif mode =="loss_surface":
             fig = plt.figure()
             plt.subplot(121)
-            if num_channels==1:
+            if self.num_channels==1:
                 plt.imshow(image[index][0],cmap='gray', vmin=0, vmax=1)
             else:    
                 plt.imshow(image[index].transpose(1,2,0))
