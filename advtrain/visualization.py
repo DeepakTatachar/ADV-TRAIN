@@ -16,7 +16,7 @@ import copy
 from advtrain.utils.str2bool import str2bool
 from advtrain.utils.str2bool import str2bool
 
-class VisualizeBoundaries():
+class Visualize():
     def __init__(self, 
                  framework=None,
                  net=None,
@@ -63,23 +63,35 @@ class VisualizeBoundaries():
         self.color_lookup = torch.Tensor(self.color_lookup[:self.num_classes]).to(self.device)
         self.num_features = self.img_size * self.img_size * self.num_channels
 
-    def get_color_for_class(self, class_labels):
+    def get_color_for_class(self, class_labels, target=None, mode="decision_boundary"):
         '''
         Args:
             class_labels (torch Tensor): Class labels NOT one hot encoded
         Returns:
             returns a 2D tensor with rows as the colors in RGB and the columns are for the corresponding labels
         '''
-        one_hot = torch.nn.functional.one_hot(class_labels, num_classes=self.num_classes).float()
+        if mode == "decision_boundary":
+            one_hot = torch.nn.functional.one_hot(class_labels, num_classes=self.num_classes).float()
 
-        # Convert label to one hot
-        pred = torch.stack([one_hot, one_hot, one_hot], dim=2)
+            # Convert label to one hot
+            pred = torch.stack([one_hot, one_hot, one_hot], dim=2)
 
-        # Multiply the label with the corresponding color values
-        color = torch.einsum('ijk, jk-> ijk', pred, self.color_lookup)
+            # Multiply the label with the corresponding color values
+            color = torch.einsum('ijk, jk-> ijk', pred, self.color_lookup)
 
-        # All except the label index per image will be 0, so sum gives the correct color
-        color = color.sum(axis=1)
+            # All except the label index per image will be 0, so sum gives the correct color
+            color = color.sum(axis=1)
+
+        elif mode == "loss_surface":
+            criterion = nn.CrossEntropyLoss()
+            color = torch.zeros((target.shape[0], 3), device=device)
+            for i in range(target.shape[0]):
+                loss = criterion(pred[i].unsqueeze(0), target[i].unsqueeze(0))
+                color[i] = torch.stack(3 * [loss], dim=0)
+
+        else:
+            raise ValueError("Undefined mode for color map")
+
         return color
 
     # Return gradient
@@ -92,7 +104,7 @@ class VisualizeBoundaries():
         loss.backward()
         return x_clone.grad.data
 
-    def show(self, image, decision_boundary, index):
+    def show(self, image, surface_boundary, index, mode ="decision_boundary"):
         """Visualizes the image and the decision boundary around it
         
         Args:
@@ -103,23 +115,45 @@ class VisualizeBoundaries():
             Returns a Tensor of shape [batch_size, 3, explore_range, explore_range] which contains an RGB image of the boundaries 
             around the input images.
         """
-        plt.subplot(121)
-        if self.num_channels==1:
-            plt.imshow(image[index][0].cpu().numpy(), cmap='gray', vmin=0, vmax=1)
-        else:    
-            plt.imshow(image[index].cpu().numpy().transpose(1,2,0))
-        plt.title('Image')
-        
-        plt.subplot(122)
-        plt.imshow(decision_boundary[index].cpu().numpy().transpose(1,2,0))
-        plt.title('Decision boundary')
-        plt.show()
+        if mode == "decision_boundary":
+            plt.subplot(121)
+            if self.num_channels==1:
+                plt.imshow(image[index][0].cpu().numpy(), cmap='gray', vmin=0, vmax=1)
+            else:    
+                plt.imshow(image[index].cpu().numpy().transpose(1,2,0))
+            plt.title('Image')
+            
+            plt.subplot(122)
+            plt.imshow(surface_boundary[index].cpu().numpy().transpose(1,2,0))
+            plt.title('Decision boundary')
+            plt.show()
+        elif mode =="loss_surface":
+            fig = plt.figure()
+            plt.subplot(121)
+            if num_channels==1:
+                plt.imshow(image[index][0],cmap='gray', vmin=0, vmax=1)
+            else:    
+                plt.imshow(image[index].transpose(1,2,0))
+            plt.title('Image')
+            
+            ax = fig.add_subplot(122, projection='3d')
+            data_source = surface_boundary[index][0]
+            x = np.arange(-args.explore_range, args.explore_range, 1)
+            y = np.arange(-args.explore_range, args.explore_range, 1)
+            X, Y = np.meshgrid(x, y)
+            ax.plot_surface(X, Y, data_source, cmap='inferno')
+            plt.title('Loss Surface')
 
-    def generate_decision_boundaries(self,
+            plt.show()
+        
+        return
+
+    def generate_surface_boundaries(self,
                                      images, 
                                      labels,
                                      explore_range=40,
-                                     use_random_dir=False):
+                                     use_random_dir=False,
+                                     mode = 'decision_boundary'):
         """Uses FGSM adversarial/random direction to obtain the boundaries of the nerual net around the specified images
 
         Args:
@@ -175,7 +209,7 @@ class VisualizeBoundaries():
         d2 = random_basis - torch.einsum('i, ij-> ij', parallel_component, d1)
         d2 /= d2.data.norm(dim=1).repeat(self.num_features, 1).transpose(0,1)
 
-        decision_boundaries = torch.zeros((current_batch_size, 3, 2 * explore_range, 2 * explore_range), device=self.device)
+        surface_boundaries = torch.zeros((current_batch_size, 3, 2 * explore_range, 2 * explore_range), device=self.device)
 
         img_start = data.view(current_batch_size, -1)
         for x in range(-explore_range, explore_range):
@@ -184,10 +218,12 @@ class VisualizeBoundaries():
                 img = img.view(current_batch_size, self.num_channels, self.img_size, self.img_size)
                 px = x + explore_range
                 py = y + explore_range
-
+                self.net.eval()
                 with torch.no_grad():
                     pred = torch.argmax(self.net(img), dim=1)
 
-                decision_boundaries[:,:, px, py] = self.get_color_for_class(pred)
-        
-        return decision_boundaries
+                if mode =="decision_boundary":
+                    surface_boundaries[:,:, px, py] = self.get_color_for_class(class_labels=pred, target=target,mode =mode)
+                elif mode =="loss_surface":
+                    surface_boundaries[:,:, px, py] = self.get_color_for_class(class_labels=pred, target=target,mode =mode)
+        return surface_boundaries
