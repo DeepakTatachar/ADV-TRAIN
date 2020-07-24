@@ -1,12 +1,3 @@
-""""""
-"""
-@authors: Deepak Ravikumar Tatachar, Sangamesh Kodge
-@copyright: Nanoelectronics Research Laboratory
-"""
-""""""
-import sys
-sys.path.append('../')
-
 import torch
 from advtrain.framework import Framework
 from advtrain.instantiate_model import instantiate_model
@@ -140,9 +131,11 @@ for batch_idx, (images, labels) in enumerate(test_loader):
     boundaries = visualization_tool.generate_surface_boundaries(images, 
                                                                  labels,
                                                                  explore_range=args.explore_range,
-                                                                 use_random_dir=args.random_dir)
+                                                                 use_random_dir=args.random_dir,
+                                                                 mode= args.mode)
 
     # Show the first image and the decision boundaries around it
     for i in range(args.num_images):
         visualization_tool.show(images, boundaries, i, mode = args.mode, explore_range= args.explore_range)
     break
+    

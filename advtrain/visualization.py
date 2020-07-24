@@ -24,6 +24,8 @@ class Visualize():
                  num_classes=10,
                  num_channels=1,
                  img_dim=32,
+                 preprocess =None,
+                 normalize =None,
                  device='cpu'):
         """This is a class to visualize the boundaries of a neural net
         
@@ -39,6 +41,8 @@ class Visualize():
         """   
         if(framework):
             self.net = framework.net
+            self.preprocess = framework.preprocess
+            self.normalize = framework.normalize
             self.num_classes = framework.dataset_info.num_classes
             self.device = framework.device
             self.num_channels = framework.dataset_info.image_channels
@@ -48,6 +52,8 @@ class Visualize():
             self.num_classes = num_classes
             self.device = device
             self.num_channels = num_channels
+            self.preprocess = preprocess
+            self.normalize = normalize
             self.img_size = img_size
 
         self.color_lookup = [[1.0, 0.0, 0.0],
@@ -85,9 +91,9 @@ class Visualize():
 
         elif mode == "loss_surface":
             criterion = nn.CrossEntropyLoss()
-            color = torch.zeros((target.shape[0], 3), device=device)
+            color = torch.zeros((target.shape[0], 3), device=self.device)
             for i in range(target.shape[0]):
-                loss = criterion(pred[i].unsqueeze(0), target[i].unsqueeze(0))
+                loss = criterion(class_labels[i].unsqueeze(0), target[i].unsqueeze(0))
                 color[i] = torch.stack(3 * [loss], dim=0)
 
         else:
@@ -100,7 +106,7 @@ class Visualize():
         criterion = nn.CrossEntropyLoss()
         x_clone = x.clone().detach()
         x_clone.requires_grad_(True)
-        out = self.net(x_clone)
+        out = self.net(self.preprocess(self.normalize(x_clone)))
         loss = criterion(out, y)
         loss.backward()
         return x_clone.grad.data
@@ -220,11 +226,12 @@ class Visualize():
                 px = x + explore_range
                 py = y + explore_range
                 self.net.eval()
-                with torch.no_grad():
-                    pred = torch.argmax(self.net(img), dim=1)
-
                 if mode =="decision_boundary":
+                    with torch.no_grad():
+                        pred = torch.argmax(self.net(self.preprocess(self.normalize(img))), dim=1)
                     surface_boundaries[:,:, px, py] = self.get_color_for_class(class_labels=pred, target=target,mode =mode)
                 elif mode =="loss_surface":
+                    with torch.no_grad():
+                        pred = self.net(self.preprocess(self.normalize(img)))
                     surface_boundaries[:,:, px, py] = self.get_color_for_class(class_labels=pred, target=target,mode =mode )
         return surface_boundaries
