@@ -5,6 +5,7 @@
 """
 """"""
 import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -104,7 +105,7 @@ class Visualize():
         loss.backward()
         return x_clone.grad.data
 
-    def show(self, image, surface_boundary, index, mode ="decision_boundary"):
+    def show(self, image, surface_boundary, index, mode ="decision_boundary", explore_range=None):
         """Visualizes the image and the decision boundary around it
         
         Args:
@@ -133,13 +134,13 @@ class Visualize():
             if self.num_channels==1:
                 plt.imshow(image[index][0],cmap='gray', vmin=0, vmax=1)
             else:    
-                plt.imshow(image[index].transpose(1,2,0))
+                plt.imshow(image[index].cpu().numpy().transpose(1,2,0))
             plt.title('Image')
             
             ax = fig.add_subplot(122, projection='3d')
-            data_source = surface_boundary[index][0]
-            x = np.arange(-args.explore_range, args.explore_range, 1)
-            y = np.arange(-args.explore_range, args.explore_range, 1)
+            data_source = surface_boundary[index][0].cpu().numpy()
+            x = np.arange(-explore_range, explore_range, 1)
+            y = np.arange(-explore_range, explore_range, 1)
             X, Y = np.meshgrid(x, y)
             ax.plot_surface(X, Y, data_source, cmap='inferno')
             plt.title('Loss Surface')
@@ -225,5 +226,5 @@ class Visualize():
                 if mode =="decision_boundary":
                     surface_boundaries[:,:, px, py] = self.get_color_for_class(class_labels=pred, target=target,mode =mode)
                 elif mode =="loss_surface":
-                    surface_boundaries[:,:, px, py] = self.get_color_for_class(class_labels=pred, target=target,mode =mode)
+                    surface_boundaries[:,:, px, py] = self.get_color_for_class(class_labels=pred, target=target,mode =mode )
         return surface_boundaries

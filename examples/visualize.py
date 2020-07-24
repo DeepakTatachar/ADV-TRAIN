@@ -62,7 +62,7 @@ parser.add_argument('--wbit',           default=32,         type=int,       help
 #Visualization Parameters
 parser.add_argument('--mode',           default='decision_boundary',        type=str,           help='Weight quantisation precision')
 parser.add_argument('--explore_range',  default=40,                         type=int,           help='range exploration')
-parser.add_argument('--random_dir',     default=False,                      type=str2bool,      help='direction for boundary and surface')
+parser.add_argument('--random_dir',     default=True,                      type=str2bool,      help='direction for boundary and surface')
 parser.add_argument('--num_images',     default=40,                         type=int,           help='number of images')
 
 global args
@@ -144,5 +144,5 @@ for batch_idx, (images, labels) in enumerate(test_loader):
 
     # Show the first image and the decision boundaries around it
     for i in range(args.num_images):
-        visualization_tool.show(images, boundaries, i, mode = args.mode)
+        visualization_tool.show(images, boundaries, i, mode = args.mode, explore_range= args.explore_range)
     break
