@@ -61,18 +61,17 @@ class Bottleneck(nn.Module):
         out = F.relu(out)
         return out
 
-
 class ResNet(nn.Module):
-    def __init__(self, block, num_blocks, num_classes=10):
+    def __init__(self, block, num_blocks, blk_stride=[1,2,2,2], num_classes=10, in_channels=3):
         super(ResNet, self).__init__()
         self.in_planes = 64
         self.type = 'single'
-        self.conv1 = nn.Conv2d(3, 64, kernel_size=3, stride=1, padding=1, bias=False)
+        self.conv1 = nn.Conv2d(in_channels, 64, kernel_size=3, stride=1, padding=1, bias=False)
         self.bn1 = nn.BatchNorm2d(64)
-        self.layer1 = self._make_layer(block, 64, num_blocks[0], stride=1)
-        self.layer2 = self._make_layer(block, 128, num_blocks[1], stride=2)
-        self.layer3 = self._make_layer(block, 256, num_blocks[2], stride=2)
-        self.layer4 = self._make_layer(block, 512, num_blocks[3], stride=2)
+        self.layer1 = self._make_layer(block, 64, num_blocks[0], stride=blk_stride[0])
+        self.layer2 = self._make_layer(block, 128, num_blocks[1], stride=blk_stride[1])
+        self.layer3 = self._make_layer(block, 256, num_blocks[2], stride=blk_stride[2])
+        self.layer4 = self._make_layer(block, 512, num_blocks[3], stride=blk_stride[3])
         if(num_classes < 200):
             self.linear = nn.Linear(512 * block.expansion, num_classes)
         else:
@@ -98,25 +97,32 @@ class ResNet(nn.Module):
         out = self.linear(out)
         return out
 
+def ResNet_(cfg='18', num_classes=10, in_channels=3):
+    if cfg=='':
+        cfg='18'
+    num_blk= {
+        '18' : [2,2,2,2],
+        '34' : [3,4,6,3],
+        '50' : [3,4,6,3],
+        '101' : [3,4,23,3],
+        '152' : [3,8,36,3],
+    }
+    blk_type = {
+        '18'    : BasicBlock,
+        '34'    : BasicBlock,
+        '50'    : Bottleneck,
+        '101'   : Bottleneck,
+        '152'   : Bottleneck,
+    }
+    stride = {
+        '18' : [1,2,2,2],
+        '34' : [1,2,2,2],
+        '50' : [1,2,2,2],
+        '101' : [1,2,2,2],
+        '152' : [1,2,2,2],
+    }
+    return ResNet(blk_type[cfg], num_blk[cfg], num_classes=num_classes, in_channels=in_channels, blk_stride= stride[cfg] )
 
-def ResNet18(num_classes=10):
-    return ResNet(BasicBlock, [2, 2, 2, 2], num_classes=num_classes)
-
-
-def ResNet34(num_classes=10):
-    return ResNet(BasicBlock, [3, 4, 6, 3], num_classes=num_classes)
-
-
-def ResNet50(num_classes=10):
-    return ResNet(Bottleneck, [3, 4, 6, 3], num_classes=num_classes)
-
-
-def ResNet101(num_classes=10):
-    return ResNet(Bottleneck, [3, 4, 23, 3], num_classes=num_classes)
-
-
-def ResNet152(num_classes=10):
-    return ResNet(Bottleneck, [3, 8, 36, 3], num_classes=num_classes)
 
 #################################################################################################################################################################################
 
@@ -187,9 +193,8 @@ class Bottleneck_Dorefa(nn.Module):
         out = F.relu(out)
         return out
 
-
 class ResNet_Dorefa(nn.Module):
-    def __init__(self, block, num_blocks, num_classes=10,w_bit=32, a_bit=32,q_out=False,q_in=False):
+    def __init__(self, block, num_blocks, blk_stride=[1,2,2,2],num_classes=10,in_channels=3,w_bit=32, a_bit=32,q_out=False,q_in=False):
         self.wbit=w_bit
         self.abit=a_bit
         super(ResNet_Dorefa, self).__init__()
@@ -202,16 +207,16 @@ class ResNet_Dorefa(nn.Module):
         self.in_planes = 64
         self.type = 'single'
         if q_in:
-            self.conv1 = Conv2dfp(3, 64, kernel_size=3, stride=1, padding=1, bias=False)
+            self.conv1 = Conv2dfp(in_channels, 64, kernel_size=3, stride=1, padding=1, bias=False)
         else:
-            self.conv1 = Conv2d(3, 64, kernel_size=3, stride=1, padding=1, bias=False)
+            self.conv1 = Conv2d(in_channels, 64, kernel_size=3, stride=1, padding=1, bias=False)
             
         self.bn1 = nn.BatchNorm2d(64)
         
-        self.layer1 = self._make_layer(block, 64, num_blocks[0], stride=1)
-        self.layer2 = self._make_layer(block, 128, num_blocks[1], stride=2)
-        self.layer3 = self._make_layer(block, 256, num_blocks[2], stride=2)
-        self.layer4 = self._make_layer(block, 512, num_blocks[3], stride=2)
+        self.layer1 = self._make_layer(block, 64, num_blocks[0], stride=blk_stride[0])
+        self.layer2 = self._make_layer(block, 128, num_blocks[1], stride=blk_stride[1])
+        self.layer3 = self._make_layer(block, 256, num_blocks[2], stride=blk_stride[2])
+        self.layer4 = self._make_layer(block, 512, num_blocks[3], stride=blk_stride[3])
         if(num_classes < 200):
             if q_out:
                 self.linear = Linear(512 * block.expansion, num_classes)
@@ -243,22 +248,26 @@ class ResNet_Dorefa(nn.Module):
         out = self.linear(out)
         return out
 
-
-def ResNet18_Dorefa(num_classes=10,wbit=32,abit=32,q_out=False,q_in=False):
-    return ResNet_Dorefa(BasicBlock_Dorefa, [2, 2, 2, 2], num_classes=num_classes,w_bit=wbit,a_bit=abit,q_out=q_out,q_in=q_in)
-
-
-def ResNet34_Dorefa(num_classes=10,wbit=32,abit=32,q_out=False,q_in=False):
-    return ResNet_Dorefa(BasicBlock_Dorefa, [3, 4, 6, 3], num_classes=num_classes,w_bit=wbit,a_bit=abit,q_out=q_out,q_in=q_in)
-
-
-def ResNet50_Dorefa(num_classes=10,wbit=32,abit=32,q_out=False,q_in=False):
-    return ResNet_Dorefa(Bottleneck_Dorefa, [3, 4, 6, 3], num_classes=num_classes,w_bit=wbit,a_bit=abit,q_out=q_out,q_in=q_in)
-
-
-def ResNet101_Dorefa(num_classes=10,wbit=32,abit=32,q_out=False,q_in=False):
-    return ResNet_Dorefa(Bottleneck_Dorefa, [3, 4, 23, 3], num_classes=num_classes,w_bit=wbit,a_bit=abit,q_out=q_out,q_in=q_in)
-
-
-def ResNet152_Dorefa(num_classes=10,wbit=32,abit=32,q_out=False,q_in=False):
-    return ResNet_Dorefa(Bottleneck_Dorefa, [3, 8, 36, 3], num_classes=num_classes,w_bit=wbit,a_bit=abit,q_out=q_out,q_in=q_in)
+def ResNet_Dorefa_(cfg='18', num_classes=10, in_channels=3,wbit=32,abit=32,q_out=False,q_in=False):
+    num_blk= {
+        '18' : [2,2,2,2],
+        '34' : [3,4,6,3],
+        '50' : [3,4,6,3],
+        '101' : [3,4,23,3],
+        '152' : [3,8,36,3],
+    }
+    blk_type = {
+        '18'    : BasicBlock,
+        '34'    : BasicBlock,
+        '50'    : Bottleneck,
+        '101'   : Bottleneck,
+        '152'   : Bottleneck,
+    }
+    stride = {
+        '18' : [1,2,2,2],
+        '34' : [1,2,2,2],
+        '50' : [1,2,2,2],
+        '101' : [1,2,2,2],
+        '152' : [1,2,2,2],
+    }
+    return ResNet_Dorefa(blk_type[cfg], num_blk[cfg], num_classes=num_classes, in_channels=in_channels, blk_stride= stride[cfg],w_bit=wbit,a_bit=abit,q_out=q_out,q_in=q_in)
