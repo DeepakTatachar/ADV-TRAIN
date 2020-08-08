@@ -87,7 +87,7 @@ class denormalize(object):
 
     def __call__(self, tensor):
         assert tensor.ndimension() == 4, 'Input image is not 4D!'
-        normalized_tensor = tensor.mul_(self.mean_expanded.expand_as(tensor)).add(self.std_expanded.expand_as(tensor))
+        normalized_tensor = tensor.mul_(self.std_expanded.expand_as(tensor)).add(self.mean_expanded.expand_as(tensor))
         return normalized_tensor
 
     def __repr__(self):

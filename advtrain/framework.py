@@ -91,6 +91,7 @@ class Framework():
 
         # Optimizer
         self.optimizer = self.get_optimizer(optimizer, learning_rate)
+        self.scheduler = torch.optim.lr_scheduler.MultiStepLR(self.optimizer,milestones=range(0,500,100),gamma=0.1)
         self.criterion = self.get_criterion_for_loss_function(loss)
         self.dataset_info = load_dataset(dataset = self.dataset,
                                          train_batch_size=self.train_batch_size,
@@ -263,6 +264,9 @@ class Framework():
             Linf += torch.sum(torch.norm(data - un_norm_perturbed_data, p=float('inf'), dim=(1,2,3)))
             data = self.preprocess(perturbed_data).to(self.device)
             out = self.net(data)
+            _, pred = torch.max(out, dim=1)
+            correct += (pred == labels).sum().item()
+            total += labels.size()[0]
 
         accuracy = float(correct) * 100.0 / float(total)
         norm_2 = float(L2.item())/ float(total)

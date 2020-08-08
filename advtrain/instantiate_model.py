@@ -203,41 +203,16 @@ def instantiate_model (dataset='cifar10',
             model = models.densenet161(pretrained=torch_weights)
             model_name = dataset.lower()+ "_" + input_quant + "_" + arch + suffix
     #RESNET CIFAR   
-    elif(arch == 'resnet' or arch == 'resnet18'  ):
+    elif(arch[0:6] == 'resnet'):
+        cfg = arch[6:]
         if dorefa:
-            model = ResNet18_Dorefa(num_classes=num_classes, abit=abit, wbit=wbit)
+            model = ResNet_Dorefa_(cfg=cfg, num_classes=num_classes, a_bit=abit, w_bit=wbit)
             model_name = dataset.lower()+ "_" + input_quant + "_" + arch +"_a" + str(abit) + 'w'+ str(wbit) + suffix
-        else:
-            model = ResNet18(num_classes=num_classes)
+            
+        else:   
+            model = ResNet_(cfg=cfg, num_classes=num_classes)
             model_name = dataset.lower()+ "_" + input_quant + "_" + arch + suffix
-    elif( arch == 'resnet34'  ):
-        if dorefa:
-            model = ResNet34_Dorefa(num_classes=num_classes, abit=abit, wbit=wbit)
-            model_name = dataset.lower()+ "_" + input_quant + "_" + arch +"_a" + str(abit) + 'w'+ str(wbit) + suffix
-        else:
-            model = ResNet34(num_classes=num_classes)
-            model_name = dataset.lower()+ "_" + input_quant + "_" + arch + suffix
-    elif( arch == 'resnet50'  ):
-        if dorefa:
-            model = ResNet50_Dorefa(num_classes=num_classes, abit=abit, wbit=wbit)
-            model_name = dataset.lower()+ "_" + input_quant + "_" + arch +"_a" + str(abit) + 'w'+ str(wbit) + suffix
-        else:
-            model = ResNet50(num_classes=num_classes)
-            model_name = dataset.lower()+ "_" + input_quant + "_" + arch + suffix
-    elif( arch == 'resnet101'  ):
-        if dorefa:
-            model = ResNet101_Dorefa(num_classes=num_classes, abit=abit, wbit=wbit)
-            model_name = dataset.lower()+ "_" + input_quant + "_" + arch +"_a" + str(abit) + 'w'+ str(wbit) + suffix
-        else:
-            model = ResNet101(num_classes=num_classes)
-            model_name = dataset.lower()+ "_" + input_quant + "_" + arch + suffix
-    elif( arch == 'resnet152'  ):
-        if dorefa:
-            model = ResNet152_Dorefa(num_classes=num_classes, abit=abit, wbit=wbit)
-            model_name = dataset.lower()+ "_" + input_quant + "_" + arch +"_a" + str(abit) + 'w'+ str(wbit) + suffix
-        else:
-            model = ResNet152(num_classes=num_classes)
-            model_name = dataset.lower()+ "_" + input_quant + "_" + arch + suffix
+    
     #VGG CIFAR
     elif(arch[0:3] == 'vgg'):
         len_arch = len(arch)
