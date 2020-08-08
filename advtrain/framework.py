@@ -91,7 +91,11 @@ class Framework():
 
         # Optimizer
         self.optimizer = self.get_optimizer(optimizer, learning_rate)
-        self.scheduler = torch.optim.lr_scheduler.MultiStepLR(self.optimizer,milestones=range(0,500,100),gamma=0.1)
+        if self.val_split>0:
+            self.scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(self.optimizer)
+        else:
+            self.scheduler = torch.optim.lr_scheduler.MultiStepLR(self.optimizer,milestones=range(0,500,100),gamma=0.1)
+        
         self.criterion = self.get_criterion_for_loss_function(loss)
         self.dataset_info = load_dataset(dataset = self.dataset,
                                          train_batch_size=self.train_batch_size,
@@ -463,12 +467,16 @@ class Framework():
 
             if(self.val_split > 0.0): 
                 val_correct, val_total, val_accuracy, val_loss = self.validate()
-                
+                #Update lr
+                self.scheduler.step(val_loss)
+            
+            
                 if val_accuracy >= self.best_val_accuracy:
                     self.best_val_accuracy = val_accuracy 
                     self.best_val_loss = val_loss
                     save_ckpt = True
             else: 
+                self.scheduler.step()
                 val_accuracy = float('inf')
                 if (self.current_epoch + 1) % 10 == 0:
                     save_ckpt = True
@@ -490,8 +498,7 @@ class Framework():
                                             'best_val_loss'     : self.best_val_loss
                                         }
             torch.save(saved_training_state, './pretrained/' + self.dataset + '/temp/' + self.model_name + '.temp')
-            #Update lr
-            self.scheduler.step()
+            
             if save_ckpt:
                 self.saves.append(self.current_epoch)
                 if parallel:
