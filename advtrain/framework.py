@@ -91,6 +91,7 @@ class Framework():
 
         # Optimizer
         self.optimizer = self.get_optimizer(optimizer, learning_rate)
+        self.scheduler = torch.optim.lr_scheduler.MultiStepLR(self.optimizer,milestones=range(0,500,100),gamma=0.1)
         self.criterion = self.get_criterion_for_loss_function(loss)
         self.dataset_info = load_dataset(dataset = self.dataset,
                                          train_batch_size=self.train_batch_size,
