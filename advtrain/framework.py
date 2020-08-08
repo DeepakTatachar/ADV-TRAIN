@@ -461,7 +461,8 @@ class Framework():
                                             'best_val_loss'     : self.best_val_loss
                                         }
             torch.save(saved_training_state, './pretrained/' + self.dataset + '/temp/' + self.model_name + '.temp')
-
+            #Update lr
+            self.scheduler.step()
             if save_ckpt:
                 self.saves.append(self.current_epoch)
                 if parallel:
