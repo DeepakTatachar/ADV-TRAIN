@@ -274,7 +274,7 @@ class Framework():
             self.confidence_correct += torch.where(pred == labels, confidence, torch.zeros_like(confidence)).sum().item()
             self.confidence_incorrect += torch.where(pred != labels, confidence, torch.zeros_like(confidence)).sum().item()
             total += labels.size()[0]
-             for ground_truth, predicted in zip(labels.cpu(), out.argmax(axis=1).cpu()):
+            for ground_truth, predicted in zip(labels.cpu(), out.argmax(axis=1).cpu()):
                 self.confusion_matrix[ground_truth, predicted] += 1
         if correct !=0:
             self.confidence_correct = self.confidence_correct/correct
