@@ -252,6 +252,9 @@ class Framework():
         torch.cuda.empty_cache()
         L2=0
         Linf=0
+        self.confidence_correct=0.0
+        self.confidence_incorrect=0.0
+        self.confusion_matrix = torch.zeros((self.num_classes, self.num_classes))
         
         for batch_idx, (data, labels) in enumerate(self.test_loader):
             data = data.to(self.device)
@@ -265,8 +268,19 @@ class Framework():
             data = self.preprocess(perturbed_data).to(self.device)
             out = self.net(data)
             _, pred = torch.max(out, dim=1)
+            sorted_output =  torch.nn.functional.softmax(out, dim=1).sort(dim=1)[0]
+            confidence = sorted_output[:,self.num_classes-1] - sorted_output[:,self.num_classes-2]
             correct += (pred == labels).sum().item()
+            self.confidence_correct += torch.where(pred == labels, confidence, torch.zeros_like(confidence)).sum().item()
+            self.confidence_incorrect += torch.where(pred != labels, confidence, torch.zeros_like(confidence)).sum().item()
             total += labels.size()[0]
+             for ground_truth, predicted in zip(labels.cpu(), out.argmax(axis=1).cpu()):
+                self.confusion_matrix[ground_truth, predicted] += 1
+        if correct !=0:
+            self.confidence_correct = self.confidence_correct/correct
+            
+        if(total != correct):
+            self.confidence_incorrect = self.confidence_incorrect/float(total-correct)
 
         accuracy = float(correct) * 100.0 / float(total)
         norm_2 = float(L2.item())/ float(total)
@@ -286,6 +300,9 @@ class Framework():
         self.net.eval()
         correct = 0
         total = 0
+        self.confidence_correct=0.0
+        self.confidence_incorrect=0.0
+        self.confusion_matrix = torch.zeros((self.num_classes, self.num_classes))
         torch.cuda.empty_cache()
         with torch.no_grad():
             for batch_idx, (data, labels) in enumerate(self.test_loader):
@@ -298,8 +315,20 @@ class Framework():
                 out = self.net(data)
                 
                 _, pred = torch.max(out, dim=1)
+                sorted_output =  torch.nn.functional.softmax(out, dim=1).sort(dim=1)[0]
+                confidence = sorted_output[:,self.num_classes-1] - sorted_output[:,self.num_classes-2]
                 correct += (pred == labels).sum().item()
+                self.confidence_correct += torch.where(pred == labels, confidence, torch.zeros_like(confidence)).sum().item()
+                self.confidence_incorrect += torch.where(pred != labels, confidence, torch.zeros_like(confidence)).sum().item()
                 total += labels.size()[0]
+                for ground_truth, predicted in zip(labels.cpu(), out.argmax(axis=1).cpu()):
+                    self.confusion_matrix[ground_truth, predicted] += 1
+        if correct !=0:
+            self.confidence_correct = self.confidence_correct/correct
+            
+        if(total != correct):
+            self.confidence_incorrect = self.confidence_incorrect/float(total-correct)
+            
         accuracy = float(correct) * 100.0 / float(total)
         return correct, total, accuracy
 

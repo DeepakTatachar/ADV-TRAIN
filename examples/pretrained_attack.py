@@ -112,4 +112,5 @@ framework = Framework(net=net,
 
 _ , _, accuracy, L2, Linf = framework.adversarial_attack()
 print('Test Acc: {} \nL2  norm: {} \nLinf norm: {}'.format(accuracy,L2, Linf))
+print("Confidence correct : {} \nConfidence incorrect : {} \nConfusion Matrix:\n{}".format(framework.confidence_correct,framework.confidence_incorrect, framework.confusion_matrix))
 

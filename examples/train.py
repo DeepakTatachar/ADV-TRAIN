@@ -116,3 +116,4 @@ framework.train(epoch_hook=epoch_hook)
 
 _ , _, accuracy = framework.test()
 print('Test Acc: {}'.format(accuracy))
+print("Confidence correct : {} \nConfidence incorrect : {} \nConfusion Matrix:\n{}".format(framework.confidence_correct,framework.confidence_incorrect, framework.confusion_matrix))
