@@ -109,7 +109,8 @@ class Blackbox_extention():
         if self.framework.adversarial_training:
             self.attack_info = self.framework.attack_info
             self.attack = attack_wrapper(self.net, self.device, **self.attack_info)
-
+            self.targeted = self.framework.targeted
+            self.target = self.framework.target
 
         
         # Training parameters exposed for hooks to access them

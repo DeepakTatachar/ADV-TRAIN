@@ -62,7 +62,7 @@ parser.add_argument('--tfr_wbit',           default=32,         type=int,       
 
 
 # Attack parameters
-parser.add_argument('--adv_trn',    default=False,      type=str2bool,  help='adv Training')
+parser.add_argument('--adv_trn',    default=True,      type=str2bool,  help='adv Training')
 parser.add_argument('--attack',     default='PGD',      type=str,       help='Type of attack [PGD, CW]')
 parser.add_argument('--lib',        default='custom',   type=str,       help='Use [foolbox, advtorch, custom] code for adversarial attack')
 parser.add_argument('--use_bpda',   default=True,       type=str2bool,  help='Use Backward Pass through Differential Approximation when using attack')
@@ -139,7 +139,7 @@ tfr_net, tfr_model_name, tfr_Q = instantiate_model( dataset=args.dataset,
                                                     torch_weights=args.tfr_torch_weights,
                                                     device= framework.device)
 
-transfer_extention = Blackbox_extention(framework = framework,
+blackbox_extention = Blackbox_extention(framework = framework,
                                         net=tfr_net,
                                         model_name=tfr_model_name,
                                         preprocess=tfr_Q,
@@ -149,12 +149,16 @@ transfer_extention = Blackbox_extention(framework = framework,
                                         loss=args.loss,
                                         learning_rate=args.lr)
 _ , _, accuracy = framework.test()
-print('Test Acc of Teacher model: {}'.format(accuracy))
+print('\nTest Acc of Teacher model: {}'.format(accuracy))
+print("Confidence correct : {} \nConfidence incorrect : {} \nConfusion Matrix:\n{}".format(framework.confidence_correct,framework.confidence_incorrect, framework.confusion_matrix))
 
 if not args.tfr_pretrained:
-    transfer_extention.train(epoch_hook=epoch_hook)
-_ , _, accuracy = transfer_extention.test()
-print('Test Acc of Student model: {}'.format(accuracy))
+    blackbox_extention.train(epoch_hook=epoch_hook)
+_ , _, accuracy = blackbox_extention.test()
+print('\nTest Acc of Student model: {}'.format(accuracy))
+print("Confidence correct : {} \nConfidence incorrect : {} \nConfusion Matrix:\n{}".format(blackbox_extention.confidence_correct,blackbox_extention.confidence_incorrect, blackbox_extention.confusion_matrix))
 
-_ , _, accuracy = transfer_extention.adversarial_attack()
-print('Blackbox attack Acc: {}'.format(accuracy)) 
+
+_ , _, accuracy, L2, Linf  = blackbox_extention.adversarial_attack()
+print('\nBlackbox attack Acc: {} \nL2  norm: {} \nLinf norm: {}'.format(accuracy,L2, Linf))
+print("Confidence correct : {} \nConfidence incorrect : {} \nConfusion Matrix:\n{}".format(blackbox_extention.confidence_correct,blackbox_extention.confidence_incorrect, blackbox_extention.confusion_matrix))
