@@ -251,13 +251,19 @@ def instantiate_model (dataset='cifar10',
     
     if load == True and torch_weights == False :
         print(" Using Model: " + arch)
-        model_path = os.path.join('./pretrained/', dataset.lower(),  model_name + '.ckpt')
+        if model_name[-4:]=='_tfr':
+            model_path = os.path.join('./pretrained/', dataset.lower(),  model_name + '.tfr')
+        else:
+            model_path = os.path.join('./pretrained/', dataset.lower(),  model_name + '.ckpt')
         model.load_state_dict(torch.load(model_path, map_location='cuda:0'))
         print(' Loaded trained model from :' + model_path)
         print(' {}'.format(Q))
     
     else:
-        model_path = os.path.join('./pretrained/', dataset.lower(),  model_name + '.ckpt')
+        if model_name[-4:]=='_tfr':
+            model_path = os.path.join('./pretrained/', dataset.lower(),  model_name + '.tfr')
+        else:
+            model_path = os.path.join('./pretrained/', dataset.lower(),  model_name + '.ckpt')
         print(' Training model save at:' + model_path)
     print('')
     return model, model_name, Q
