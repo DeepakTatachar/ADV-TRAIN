@@ -125,8 +125,6 @@ def ResNet_(cfg='18', num_classes=10, in_channels=3):
     }
     num_features = {
         '18' : 0,
-        '18dct8' : 0,
-        '18dct4' :0,
         '34' : 0,
         '50' : 0,
         '101' : 0,
@@ -288,8 +286,6 @@ def ResNet_Dorefa_(cfg='18', num_classes=10, in_channels=3,wbit=32,abit=32,q_out
     }
     num_features = {
         '18' : 0,
-        '18dct8' : 0,
-        '18dct4' :0,
         '34' : 0,
         '50' : 0,
         '101' : 0,
