@@ -151,7 +151,8 @@ transfer_extention = Blackbox_extention(framework = framework,
 _ , _, accuracy = framework.test()
 print('Test Acc of Teacher model: {}'.format(accuracy))
 
-transfer_extention.train(epoch_hook=epoch_hook)
+if not args.tfr_pretrained:
+    transfer_extention.train(epoch_hook=epoch_hook)
 _ , _, accuracy = transfer_extention.test()
 print('Test Acc of Student model: {}'.format(accuracy))
 
