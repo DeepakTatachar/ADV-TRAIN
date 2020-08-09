@@ -223,7 +223,7 @@ class Blackbox_extention():
             perturbed_data, un_norm_perturbed_data = self.attack.generate_adversary(data, labels, adv_train_model = self.net, targeted=self.targeted, target_class=self.target )
             L2 += torch.sum(torch.norm(data - un_norm_perturbed_data, p=2, dim=(1,2,3)))
             Linf += torch.sum(torch.norm(data - un_norm_perturbed_data, p=float('inf'), dim=(1,2,3)))
-            data = self.preprocess(perturbed_data).to(self.device)
+            data = self.framework.preprocess(self.framework.normalize(un_norm_perturbed_data)).to(self.device)
             out = self.framework.net(data)
             _, pred = torch.max(out, dim=1)
             sorted_output =  torch.nn.functional.softmax(out, dim=1).sort(dim=1)[0]
