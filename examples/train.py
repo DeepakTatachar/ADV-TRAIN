@@ -69,6 +69,8 @@ if args.dataset.lower()=='imagenet':
     num_classes=1000
 elif  args.dataset.lower()=='tinyimagenet':
     num_classes=200
+elif  args.dataset.lower()=='cifar100':
+    num_classes=100
 else:
     num_classes=10
 

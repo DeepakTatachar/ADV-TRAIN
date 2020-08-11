@@ -61,8 +61,8 @@ args = parser.parse_args()
 print(args)
 
 
-if args.dataset.lower()=='simple':
-    num_classes=4
+if  args.dataset.lower()=='cifar100':
+    num_classes=100
 elif args.dataset.lower()=='imagenet':
     num_classes=1000
 elif  args.dataset.lower()=='tinyimagenet':
